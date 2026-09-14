@@ -103,3 +103,8 @@ Active rooms, tokens และ clocks อยู่ใน memory ของ proces
 
 หน้าเกม กติกา การ์ด ข้อความแจ้งเตือน และบันทึกเหตุการณ์ใช้ภาษาไทย แสดงเงินเป็นหน่วยล้านบาทและวันที่/เวลารูปแบบไทย ธีมใช้พื้นขาว เมนูน้ำเงิน ปุ่มหลักสีแดง และรายละเอียดสีทอง ฟอนต์ Noto Sans Thai / Noto Serif Thai ชื่อแบรนด์ The Inner Circle และรหัสนักลงทุน A–F คงเดิม โดยรหัส Socket และกติกาไม่เปลี่ยน
 
+
+## Deploy แบบไม่ใช้ฐานข้อมูล
+
+Blueprint ปัจจุบันสร้างเฉพาะ Render Web Service แผน Free ไม่สร้าง PostgreSQL และไม่ต้องตั้ง DATABASE_URL หรือ JWT_SECRET ตั้งเพียง CLIENT_URL เป็น origin ของ Vercel และ VITE_SERVER_URL บน Vercel ให้ชี้ไป Render ประวัติและอันดับถาวรจะไม่ถูกบันทึก ห้องที่กำลังเล่นหายเมื่อเซิร์ฟเวอร์รีสตาร์ต
+
