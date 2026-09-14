@@ -70,7 +70,7 @@ Tests ครอบคลุมข้อเสนอผิดสิทธิ์/�
 1. Push repository ไป Git provider ของคุณ
 2. Render → New → Web Service → เชื่อม repository หรือใช้ Blueprint render.yaml
 3. Runtime Node, Root Directory เว้นว่างเพราะต้องใช้ shared/
-4. Build: `npm ci && npm run build:server`
+4. Build: `npm ci --include=dev && npm run build:server`
 5. Start: `npm run start:server`
 6. Health Check Path: `/health`
 7. ตั้ง NODE_ENV=production, CLIENT_URL=https://YOUR-FRONTEND.vercel.app, DATABASE_URL=postgresql://...
@@ -107,4 +107,5 @@ Active rooms, tokens และ clocks อยู่ใน memory ของ proces
 ## Deploy แบบไม่ใช้ฐานข้อมูล
 
 Blueprint ปัจจุบันสร้างเฉพาะ Render Web Service แผน Free ไม่สร้าง PostgreSQL และไม่ต้องตั้ง DATABASE_URL หรือ JWT_SECRET ตั้งเพียง CLIENT_URL เป็น origin ของ Vercel และ VITE_SERVER_URL บน Vercel ให้ชี้ไป Render ประวัติและอันดับถาวรจะไม่ถูกบันทึก ห้องที่กำลังเล่นหายเมื่อเซิร์ฟเวอร์รีสตาร์ต
+
 
