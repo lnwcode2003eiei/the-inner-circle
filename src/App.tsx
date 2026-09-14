@@ -32,10 +32,11 @@ import {
 } from "lucide-react";
 import { socket } from "./services/socket";
 import type { Action, ActionCard, GameRoom, Reply } from "../shared/types";
-import { CARD_INFO } from "../shared/constants";
+import { CARD_INFO, CARD_NAMES } from "../shared/constants";
 import "./index.css";
+import "./thai-theme.css";
 const money = (n: number) =>
-  `฿${(n / 1000000).toLocaleString("en", { maximumFractionDigits: 2 })}M`;
+  `฿${(n / 1000000).toLocaleString("th-TH", { maximumFractionDigits: 2 })} ล้าน`;
 const portraits = [
   "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=faces",
   "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces",
@@ -43,12 +44,12 @@ const portraits = [
   "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces",
 ];
 const investorNames = [
-  "Alexandra • Capital",
-  "Bennett • Technology",
-  "Celine • Property",
-  "Dominic • Industry",
-  "Elena • Ventures",
-  "Felix • Finance",
+  "อเล็กซานดรา • เงินทุน",
+  "เบนเน็ตต์ • เทคโนโลยี",
+  "เซลีน • อสังหาริมทรัพย์",
+  "โดมินิก • อุตสาหกรรม",
+  "เอเลนา • ธุรกิจร่วมทุน",
+  "เฟลิกซ์ • การเงิน",
 ];
 function App() {
   const [page, setPage] = useState("boardroom"),
@@ -62,7 +63,7 @@ function App() {
     [code, setCode] = useState(location.pathname.split("/game/")[1] || ""),
     [room, setRoom] = useState<GameRoom>(),
     [myId, setMyId] = useState(""),
-    [connected, setConnected] = useState(false),
+    [connected, setเชื่อมต่อแล้ว] = useState(false),
     [pending, setPending] = useState(false),
     [notice, setNotice] = useState(""),
     [muted, setMuted] = useState(localStorage.getItem("ic-muted") === "true"),
@@ -116,7 +117,7 @@ function App() {
   useEffect(() => {
     const onState = (r: GameRoom) => setRoom(r);
     const onConnect = () => {
-      setConnected(true);
+      setเชื่อมต่อแล้ว(true);
       const token = localStorage.getItem("gamePlayerToken"),
         savedCode = localStorage.getItem("ic-room");
       if (token && savedCode)
@@ -135,7 +136,7 @@ function App() {
         });
     };
     socket.on("connect", onConnect);
-    socket.on("disconnect", () => setConnected(false));
+    socket.on("disconnect", () => setเชื่อมต่อแล้ว(false));
     socket.on("game:state", onState);
     socket.on("system:error", notify);
     socket.connect();
@@ -196,7 +197,7 @@ function App() {
       .then(setRecords)
       .catch(() => {
         if (!controller.signal.aborted)
-          notify("Could not load records. Please check the server connection.");
+          notify("โหลดข้อมูลไม่ได้ กรุณาตรวจสอบการเชื่อมต่อเซิร์ฟเวอร์");
       })
       .finally(() => {
         if (!controller.signal.aborted) setDataLoading(false);
@@ -205,11 +206,11 @@ function App() {
   }, [page]);
   const enter = (practice = false) => {
     if (!name.trim()) {
-      notify("Please enter your name to take a seat.");
+      notify("กรุณากรอกชื่อก่อนเข้าร่วมเกม");
       return;
     }
     if (!connected) {
-      notify("Connecting to the game server. Please try again in a moment.");
+      notify("กำลังเชื่อมต่อเซิร์ฟเวอร์เกม กรุณาลองอีกครั้งสักครู่");
       return;
     }
     setPending(true);
@@ -235,7 +236,7 @@ function App() {
         .emit("room:join", { name, code: code.toUpperCase() }, (err, r) =>
           err
             ? (setPending(false),
-              notify("The server did not respond. Please retry."))
+              notify("เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองอีกครั้ง"))
             : cb(r),
         );
     else
@@ -244,13 +245,13 @@ function App() {
         .emit("room:create", { name, practice }, (err, r) =>
           err
             ? (setPending(false),
-              notify("The server did not respond. Please retry."))
+              notify("เซิร์ฟเวอร์ไม่ตอบสนอง กรุณาลองอีกครั้ง"))
             : cb(r),
         );
   };
   const action = (a: Action) => {
     socket.timeout(8000).emit("player:action", a, (err, r) => {
-      if (err) notify("Connection interrupted. Please retry.");
+      if (err) notify("การเชื่อมต่อขัดข้อง กรุณาลองอีกครั้ง");
       else if (r.error) notify(r.error);
       else if (a.type === "LEAVE") {
         setRoom(undefined);
@@ -296,8 +297,8 @@ function App() {
   const copy = () =>
     navigator.clipboard
       .writeText(`${location.origin}/game/${room?.code}`)
-      .then(() => notify("Invite link copied. Your table is waiting."))
-      .catch(() => notify(`Room code: ${room?.code}`));
+      .then(() => notify("คัดลอกลิงก์เชิญแล้ว ส่งให้เพื่อนได้เลย"))
+      .catch(() => notify(`รหัสห้อง: ${room?.code}`));
   return (
     <div className="app-shell">
       <aside className="sidebar">
@@ -317,13 +318,13 @@ function App() {
             THE INNER<span>CIRCLE</span>
           </div>
         </a>
-        <div className="club-tag">WHERE AMBITION MEETS OPPORTUNITY</div>
-        <div className="nav-label">YOUR PRIVATE CLUB</div>
+        <div className="club-tag">เมื่อความทะเยอทะยานพบโอกาส</div>
+        <div className="nav-label">คลับส่วนตัวของคุณ</div>
         <nav>
           {[
-            { id: "boardroom", icon: LayoutDashboard, label: "The Boardroom" },
-            { id: "leaderboard", icon: Trophy, label: "Leaderboard" },
-            { id: "history", icon: Clock3, label: "Match History" },
+            { id: "boardroom", icon: LayoutDashboard, label: "ห้องเจรจา" },
+            { id: "leaderboard", icon: Trophy, label: "อันดับนักเจรจา" },
+            { id: "history", icon: Clock3, label: "ประวัติการเล่น" },
           ].map((n) => (
             <button
               className={page === n.id ? "active" : ""}
@@ -341,55 +342,55 @@ function App() {
             onClick={() => setPage("rules")}
           >
             <GraduationCap size={19} />
-            How to Play
+            วิธีเล่น
             <ArrowUpRight size={14} className="end" />
           </button>
           <button onClick={() => setModal("cards")}>
             <Layers3 size={18} />
-            The Card Collection
+            คลังการ์ด
           </button>
         </nav>
         <div className="sidebar-bottom">
           <div className="club-card">
             <Diamond size={20} />
             <span>
-              A seat at the table.
+              หนึ่งที่นั่งบนโต๊ะเจรจา
               <br />
-              <strong>A chance at everything.</strong>
+              <strong>โอกาสสร้างความสำเร็จ</strong>
             </span>
             <div className="mini-line" />
           </div>
           <button className="help-link" onClick={() => setModal("help")}>
-            <HelpCircle size={17} /> Help & game rules{" "}
+            <HelpCircle size={17} /> ความช่วยเหลือและกติกา{" "}
             <ArrowUpRight size={14} />
           </button>
           <div className="sidebar-foot">
-            <span className="green-dot" /> ALL SYSTEMS IN PLAY <span>v1.0</span>
+            <span className="green-dot" /> พร้อมเปิดโต๊ะเจรจา <span>v1.0</span>
           </div>
         </div>
       </aside>
       <main>
         <header>
           <div className="breadcrumb">
-            The Club <ChevronRight size={14} />{" "}
+            หน้าหลัก <ChevronRight size={14} />{" "}
             <strong>
               {page === "boardroom"
-                ? "The Boardroom"
+                ? "ห้องเจรจา"
                 : page === "leaderboard"
-                  ? "Leaderboard"
+                  ? "อันดับนักเจรจา"
                   : page === "history"
-                    ? "Match History"
-                    : "How to Play"}
+                    ? "ประวัติการเล่น"
+                    : "วิธีเล่น"}
             </strong>
           </div>
           <div className="header-right">
             <span className="live-status">
               <span className={connected ? "green-dot" : "amber-dot"} />
-              {connected ? "Connected" : "Connecting"}
+              {connected ? "เชื่อมต่อแล้ว" : "กำลังเชื่อมต่อ"}
             </span>
             <button
               className="icon-button"
-              aria-label={muted ? "Unmute sounds" : "Mute sounds"}
+              aria-label={muted ? "เปิดเสียง" : "ปิดเสียง"}
               onClick={() => {
                 setMuted(!muted);
                 localStorage.setItem("ic-muted", String(!muted));
@@ -402,8 +403,8 @@ function App() {
               {(name || "G").slice(0, 1).toUpperCase()}
             </div>
             <div className="profile-name">
-              {name || "Guest player"}
-              <span>{room ? "At the table" : "Make your entrance"}</span>
+              {name || "ผู้เล่นทั่วไป"}
+              <span>{room ? "อยู่ที่โต๊ะเจรจา" : "พร้อมเข้าสู่วงเจรจา"}</span>
             </div>
           </div>
         </header>
@@ -413,35 +414,35 @@ function App() {
               <div className="page-heading">
                 <div>
                   <div className="eyebrow">
-                    <span /> THE ART OF THE DEAL
+                    <span /> ศิลปะแห่งการเจรจา
                   </div>
-                  <h1>Welcome to the boardroom.</h1>
-                  <p>Build alliances. Negotiate your share. Own the room.</p>
+                  <h1>ยินดีต้อนรับสู่ห้องเจรจา</h1>
+                  <p>สร้างพันธมิตร ต่อรองส่วนแบ่ง แล้วก้าวขึ้นเป็นผู้ชนะ</p>
                 </div>
                 <span className="edition">
-                  <Diamond size={14} /> THE FIRST EDITION
+                  <Diamond size={14} /> ฉบับปฐมฤกษ์
                 </span>
               </div>
               <section className="hero">
                 <img
                   src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85"
-                  alt="Dramatic modern skyscrapers rising into the sky"
+                  alt="ตึกระฟ้าสมัยใหม่ใจกลางย่านธุรกิจ"
                 />
                 <div className="hero-shade" />
                 <div className="hero-grid" />
                 <div className="hero-content">
                   <div className="hero-kicker">
-                    <span /> BIG DEALS. BIGGER PERSONALITIES.
+                    <span /> ดีลใหญ่ วัดกันที่ชั้นเชิง
                   </div>
                   <h2>
-                    Fortune favors
+                    โอกาสเป็นของ
                     <br />
-                    the <em>persuasive.</em>
+                    <em>นักเจรจา</em>
                   </h2>
                   <p>
-                    Six seats. Endless possibilities. The ultimate game
-                    <br className="desktop-break" /> of business, alliances, and
-                    beautifully broken promises.
+                    หกที่นั่ง โอกาสไม่รู้จบ เกมแห่งธุรกิจ
+                    <br className="desktop-break" /> พันธมิตร
+                    และคำสัญญาที่อาจเปลี่ยนไป
                   </p>
                   <div className="hero-buttons">
                     <button
@@ -449,43 +450,43 @@ function App() {
                       onClick={() => setModal("create")}
                     >
                       <Plus size={18} />
-                      Create a room <ArrowRight size={17} />
+                      สร้างห้อง <ArrowRight size={17} />
                     </button>
                     <button
                       className="glass-button"
                       onClick={() => setModal("join")}
                     >
                       <Link2 size={17} />
-                      Join a room
+                      เข้าร่วมห้อง
                     </button>
                   </div>
                   <div className="hero-meta">
                     <span>
                       <Users size={15} />
-                      3–6 players
+                      ผู้เล่น 3–6 คน
                     </span>
                     <i />
                     <span>
                       <Clock3 size={15} />
-                      20–40 minutes
+                      20–40 นาที
                     </span>
                     <i />
                     <span>
                       <Globe2 size={15} />
-                      Play from anywhere
+                      เล่นได้จากทุกที่
                     </span>
                   </div>
                 </div>
                 <div className="hero-seal">
                   <Diamond size={23} />
                   <span>
-                    EVERY DEAL
+                    ทุกข้อตกลง
                     <br />
-                    HAS A PRICE.
+                    มีราคาของมัน
                   </span>
                 </div>
                 <div className="hero-bottom-label">
-                  THE CITY IS YOURS. MAKE YOUR MOVE.<span>01 / 03</span>
+                  เมืองนี้รอคุณอยู่ เริ่มเกมของคุณได้เลย<span>01 / 03</span>
                 </div>
               </section>
               <div className="feature-strip">
@@ -494,10 +495,8 @@ function App() {
                     <Handshake />
                   </div>
                   <span>
-                    <strong>Real people. Real negotiation.</strong>
-                    <small>
-                      Every alliance is a choice. Every offer matters.
-                    </small>
+                    <strong>ผู้เล่นจริง เจรจากันจริง</strong>
+                    <small>ทุกพันธมิตรมีความหมาย ทุกข้อเสนอมีค่า</small>
                   </span>
                 </div>
                 <div>
@@ -505,8 +504,8 @@ function App() {
                     <ShieldCheck />
                   </div>
                   <span>
-                    <strong>A level playing field.</strong>
-                    <small>Your strategy wins. Never your connection.</small>
+                    <strong>วัดกันที่ฝีมือ</strong>
+                    <small>วางกลยุทธ์ให้ดี แล้วคว้าโอกาสของคุณ</small>
                   </span>
                 </div>
                 <div>
@@ -514,21 +513,21 @@ function App() {
                     <Sparkles />
                   </div>
                   <span>
-                    <strong>No two deals alike.</strong>
-                    <small>Power cards keep the balance in motion.</small>
+                    <strong>ไม่มีดีลไหนเหมือนกัน</strong>
+                    <small>การ์ดพลิกเกม เปลี่ยนความได้เปรียบได้เสมอ</small>
                   </span>
                 </div>
               </div>
               <div className="section-title">
                 <div>
-                  <span className="eyebrow">YOUR NEXT MOVE</span>
-                  <h2>There’s more than one way to win.</h2>
+                  <span className="eyebrow">ก้าวต่อไปของคุณ</span>
+                  <h2>ชัยชนะมีได้มากกว่าหนึ่งทาง</h2>
                 </div>
                 <button
                   className="text-button"
                   onClick={() => setPage("rules")}
                 >
-                  Learn the rules <ArrowUpRight size={16} />
+                  เรียนรู้กติกา <ArrowUpRight size={16} />
                 </button>
               </div>
               <div className="path-cards">
@@ -540,16 +539,16 @@ function App() {
                     <span className="path-icon">
                       <GraduationCap size={24} />
                     </span>
-                    <span className="small-tag">NEW TO THE TABLE?</span>
+                    <span className="small-tag">เพิ่งเริ่มเล่นใช่ไหม?</span>
                   </div>
-                  <h3>Find your edge.</h3>
+                  <h3>ค้นหาชั้นเชิงของคุณ</h3>
                   <p>
-                    Learn the ropes in a practice game.
+                    ลองฝึกเจรจาในเกมจำลอง
                     <br />
-                    No pressure. Just possibilities.
+                    ไม่ต้องกดดัน ลองได้ทุกกลยุทธ์
                   </p>
                   <div className="path-link">
-                    Enter the practice room <ArrowRight size={17} />
+                    เข้าสู่ห้องฝึกเล่น <ArrowRight size={17} />
                   </div>
                   <span className="path-number">01</span>
                 </button>
@@ -564,14 +563,14 @@ function App() {
                       <span>♔</span>
                     </div>
                   </div>
-                  <h3>Always have a play.</h3>
+                  <h3>มีไม้เด็ดไว้เสมอ</h3>
                   <p>
-                    Take control, call a bluff, or turn the tables.
+                    แย่งอำนาจ สกัดคู่แข่ง หรือพลิกสถานการณ์
                     <br />
-                    Get to know your six power cards.
+                    รู้จักการ์ดพิเศษทั้ง 6 แบบ
                   </p>
                   <div className="path-link">
-                    Explore the card collection <ArrowRight size={17} />
+                    สำรวจคลังการ์ด <ArrowRight size={17} />
                   </div>
                   <span className="path-number">02</span>
                 </button>
@@ -583,23 +582,23 @@ function App() {
                     <span className="path-icon">
                       <Trophy size={22} />
                     </span>
-                    <span className="small-tag">THE HALL OF INFLUENCE</span>
+                    <span className="small-tag">ทำเนียบนักเจรจา</span>
                   </div>
-                  <h3>Make a name for yourself.</h3>
+                  <h3>สร้างชื่อในวงการ</h3>
                   <p>
-                    Great deals make fortunes.
+                    ดีลที่ดีสร้างความมั่งคั่ง
                     <br />
-                    Great players make a reputation.
+                    นักเจรจาที่เก่งสร้างชื่อเสียง
                   </p>
                   <div className="path-link">
-                    Meet the top dealmakers <ArrowRight size={17} />
+                    ดูอันดับนักเจรจา <ArrowRight size={17} />
                   </div>
                   <span className="path-number">03</span>
                 </button>
               </div>
               <div className="quote">
-                <span>“</span> In this room, your word is your currency. Spend
-                it wisely.<span>”</span>
+                <span>“</span> บนโต๊ะนี้ คำพูดคือทุนของคุณ จงใช้ให้คุ้มค่า
+                <span>”</span>
               </div>
             </>
           )}
@@ -610,21 +609,21 @@ function App() {
                   <div className="eyebrow">
                     <span />{" "}
                     {room.players.some((p) => p.bot)
-                      ? "PRACTICE TABLE"
-                      : "PRIVATE TABLE"}{" "}
+                      ? "ห้องฝึกเล่น"
+                      : "ห้องส่วนตัว"}{" "}
                     · {room.code}
                   </div>
                   <h1>
                     {room.status === "lobby"
-                      ? "Your circle is coming together."
+                      ? "รวมทีมให้พร้อม แล้วเริ่มเจรจา"
                       : room.status === "finished"
-                        ? "Fortune has a new name."
-                        : "Let’s make a deal."}
+                        ? "โฉมหน้าผู้ชนะคนใหม่"
+                        : "มาเจรจากันเถอะ"}
                   </h1>
                   <p>
                     {room.status === "lobby"
-                      ? "Invite your allies. Or your future rivals."
-                      : "The opportunity is on the table. What’s your price?"}
+                      ? "ชวนเพื่อนมาเป็นพันธมิตร หรือคู่แข่งคนต่อไป"
+                      : "โอกาสอยู่ตรงหน้า คุณต้องการส่วนแบ่งเท่าไร?"}
                   </p>
                 </div>
                 <button
@@ -641,69 +640,69 @@ function App() {
                     <Copy size={16} />
                   )}{" "}
                   {room.players.some((p) => p.bot)
-                    ? "Exit practice"
-                    : "Invite friends"}
+                    ? "ออกจากห้องฝึก"
+                    : "ชวนเพื่อน"}
                 </button>
               </div>
               {room.status === "lobby" ? (
                 <div className="lobby-layout">
                   <section className="panel lobby-players">
                     <div className="panel-title">
-                      <h2>The guest list</h2>
-                      <span>{room.players.length} / 6 players</span>
+                      <h2>ผู้เล่นในห้อง</h2>
+                      <span>{room.players.length} / 6 คน</span>
                     </div>
                     {room.players.map((p) => (
                       <div className="lobby-player" key={p.id}>
                         <img src={portraits[p.avatar % 4]} alt="" />
                         <div>
                           <strong>
-                            {p.name} {p.id === myId && <small>(you)</small>}
+                            {p.name} {p.id === myId && <small>(คุณ)</small>}
                           </strong>
                           <span>
                             {p.id === room.hostId
-                              ? "Host · Your table, your rules"
+                              ? "เจ้าของห้อง · ผู้เปิดโต๊ะเจรจา"
                               : p.connected
-                                ? "At the table"
-                                : "Reconnecting…"}
+                                ? "อยู่ที่โต๊ะเจรจา"
+                                : "กำลังเชื่อมต่อใหม่…"}
                           </span>
                         </div>
                         <span
                           className={p.ready ? "ready-pill" : "waiting-pill"}
                         >
                           {p.ready
-                            ? "Ready"
+                            ? "พร้อมแล้ว"
                             : p.id === room.hostId
-                              ? "Host"
-                              : "Not ready"}
+                              ? "เจ้าของห้อง"
+                              : "ยังไม่พร้อม"}
                         </span>
                       </div>
                     ))}
                     {Array.from({ length: 6 - room.players.length }, (_, i) => (
                       <button key={i} className="empty-seat" onClick={copy}>
                         <Plus size={19} />
-                        An open seat. An untold story.
+                        ยังมีที่ว่าง รอเพื่อนมาเข้าร่วม
                         <Link2 size={16} />
                       </button>
                     ))}
                   </section>
                   <section className="panel lobby-settings">
                     <Crown size={35} />
-                    <h2>A private invitation.</h2>
+                    <h2>คำเชิญสำหรับคนพิเศษ</h2>
                     <p>
-                      Send your room code to 2–5 friends. Everyone must be ready
-                      before the first deal.
+                      ส่งรหัสห้องให้เพื่อน 2–5 คน
+                      ทุกคนต้องกดพร้อมก่อนเริ่มดีลแรก
                     </p>
                     <div className="room-code">{room.code}</div>
                     <button className="gold-button full" onClick={copy}>
                       <Copy size={16} />
-                      Copy invite link
+                      คัดลอกลิงก์เชิญ
                     </button>
                     <button
                       className="outline-button full"
                       onClick={() => action({ type: "READY" })}
                     >
                       {me?.ready ? <Check size={16} /> : <Users size={16} />}{" "}
-                      {me?.ready ? "Ready — click to unready" : "I’m ready"}
+                      {me?.ready ? "พร้อมแล้ว — กดเพื่อยกเลิก" : "ฉันพร้อมแล้ว"}
                     </button>
                     {myId === room.hostId && (
                       <button
@@ -714,7 +713,7 @@ function App() {
                         }
                         onClick={() => action({ type: "START" })}
                       >
-                        Start the game <ArrowRight size={16} />
+                        เริ่มเกม <ArrowRight size={16} />
                       </button>
                     )}
                     <button
@@ -722,20 +721,20 @@ function App() {
                       onClick={() => action({ type: "LEAVE" })}
                     >
                       <DoorOpen size={16} />
-                      Leave room
+                      ออกจากห้อง
                     </button>
                   </section>
                 </div>
               ) : room.status === "finished" ? (
                 <section className="panel results">
                   <Trophy size={48} />
-                  <div className="eyebrow">THE FINAL STANDINGS</div>
+                  <div className="eyebrow">อันดับเมื่อจบเกม</div>
                   <h2>
                     {
                       [...room.players].sort((a, b) => b.money - a.money)[0]
                         .name
                     }{" "}
-                    owns the room.
+                    ครองโต๊ะเจรจาในเกมนี้
                   </h2>
                   {[...room.players]
                     .sort((a, b) => b.money - a.money)
@@ -759,14 +758,14 @@ function App() {
                         className="gold-button"
                         onClick={() => action({ type: "AGAIN" })}
                       >
-                        Play again <ArrowRight size={16} />
+                        เล่นอีกครั้ง <ArrowRight size={16} />
                       </button>
                     )}
                     <button
                       className="outline-button"
                       onClick={() => action({ type: "LEAVE" })}
                     >
-                      Back to the club
+                      กลับหน้าหลัก
                     </button>
                   </div>
                 </section>
@@ -774,11 +773,11 @@ function App() {
                 <>
                   <div className="game-top">
                     <span>
-                      <Layers3 size={17} /> DEAL{" "}
+                      <Layers3 size={17} /> ดีล{" "}
                       <b>{String(room.round).padStart(2, "0")}</b> / 15
                     </span>
                     <span>
-                      <Crown size={17} /> LED BY <b>{boss?.name}</b>
+                      <Crown size={17} /> ผู้นำดีล <b>{boss?.name}</b>
                     </span>
                     <span
                       className={
@@ -796,14 +795,14 @@ function App() {
                               1000,
                           ),
                         )}
-                        s
+                        วิ
                       </b>{" "}
-                      TO CLOSE
+                      ก่อนปิดดีล
                     </span>
                   </div>
                   <div className="game-layout">
                     <div className="players-column">
-                      <div className="eyebrow">THE DEALMAKERS</div>
+                      <div className="eyebrow">นักเจรจา</div>
                       {room.players.map((p) => (
                         <motion.div
                           layout
@@ -816,12 +815,12 @@ function App() {
                               <strong>{p.name}</strong>
                               <small>
                                 {p.id === myId
-                                  ? "You"
+                                  ? "คุณ"
                                   : p.bot
-                                    ? "Practice partner"
+                                    ? "คู่แข่งจำลอง"
                                     : p.connected
-                                      ? "Connected"
-                                      : "Reconnecting"}
+                                      ? "เชื่อมต่อแล้ว"
+                                      : "กำลังเชื่อมต่อใหม่"}
                               </small>
                             </div>
                             {p.id === room.bossId && <Crown size={16} />}
@@ -845,11 +844,11 @@ function App() {
                             ))}
                             <small>
                               {room.blocked.includes(p.id)
-                                ? "Blocked"
+                                ? "ถูกบล็อก"
                                 : room.offer?.accepted.includes(p.id)
-                                  ? "✓ Accepted"
+                                  ? "✓ ยอมรับแล้ว"
                                   : room.offer?.rejected.includes(p.id)
-                                    ? "Rejected"
+                                    ? "ปฏิเสธแล้ว"
                                     : ""}
                             </small>
                           </div>
@@ -866,7 +865,7 @@ function App() {
                         <div className="deal-image">
                           <img
                             src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1000&q=85"
-                            alt="Sculptural contemporary architecture"
+                            alt="สถาปัตยกรรมร่วมสมัยของโครงการ"
                           />
                           <span className="small-tag">{room.deal?.sector}</span>
                           <span className="deal-index">
@@ -874,16 +873,14 @@ function App() {
                           </span>
                         </div>
                         <div className="deal-body">
-                          <span className="eyebrow">
-                            AN OPPORTUNITY WORTH TAKING
-                          </span>
+                          <span className="eyebrow">โอกาสที่ไม่ควรพลาด</span>
                           <h2>{room.deal?.name}</h2>
                           <div className="deal-value">
                             {money(room.deal?.value ?? 0)}
-                            <span>DEAL VALUE</span>
+                            <span>มูลค่าดีล</span>
                           </div>
                           <div className="deal-requirements">
-                            <span>REQUIRED INVESTORS</span>
+                            <span>นักลงทุนที่ต้องใช้</span>
                             <div>
                               {room.deal?.requiredInvestors.map((i) => (
                                 <span
@@ -895,23 +892,23 @@ function App() {
                                 </span>
                               ))}
                             </div>
-                            <small>{room.deal?.difficulty} opportunity</small>
+                            <small>{room.deal?.difficulty}</small>
                           </div>
                           {room.stack.length > 0 ? (
                             <div className="stack-banner">
                               <Swords size={18} />
-                              {room.stack.at(-1)?.card.type} ·{" "}
+                              {CARD_NAMES[room.stack.at(-1)!.card.type]} ·{" "}
                               {Math.max(
                                 0,
                                 Math.ceil(
                                   ((room.stackDeadline ?? 0) - now) / 1000,
                                 ),
                               )}
-                              s to counter
+                              วินาทีสำหรับโต้กลับ
                             </div>
                           ) : room.offer ? (
                             <div className="current-offer">
-                              <div className="eyebrow">THE CURRENT OFFER</div>
+                              <div className="eyebrow">ข้อเสนอปัจจุบัน</div>
                               {Object.entries(room.offer.amounts).map(
                                 ([id, v]) => (
                                   <div key={id}>
@@ -937,13 +934,13 @@ function App() {
                                       className="gold-button"
                                       onClick={() => action({ type: "ACCEPT" })}
                                     >
-                                      Accept <Check size={15} />
+                                      ยอมรับ <Check size={15} />
                                     </button>
                                     <button
                                       className="outline-button"
                                       onClick={() => action({ type: "REJECT" })}
                                     >
-                                      Reject
+                                      ปฏิเสธ
                                     </button>
                                   </>
                                 )}
@@ -952,7 +949,7 @@ function App() {
                                     className="text-button"
                                     onClick={openOffer}
                                   >
-                                    Revise
+                                    แก้ไขข้อเสนอ
                                   </button>
                                 )}
                               </div>
@@ -961,8 +958,8 @@ function App() {
                             <div className="deal-cta">
                               <p>
                                 {isBoss
-                                  ? "You lead this deal. Make them an offer."
-                                  : `${boss?.name} is preparing an offer. Make your case in chat.`}
+                                  ? "คุณเป็นผู้นำดีลนี้ เริ่มเสนอส่วนแบ่งได้เลย"
+                                  : `${boss?.name} กำลังเตรียมข้อเสนอ ลองต่อรองผ่านแชตได้เลย`}
                               </p>
                               {isBoss && (
                                 <button
@@ -970,7 +967,7 @@ function App() {
                                   onClick={openOffer}
                                 >
                                   <Handshake size={18} />
-                                  Open negotiation <ArrowRight size={17} />
+                                  เริ่มเจรจา <ArrowRight size={17} />
                                 </button>
                               )}
                             </div>
@@ -980,7 +977,7 @@ function App() {
                               className="text-button full pass-button"
                               onClick={() => action({ type: "PASS" })}
                             >
-                              Pass on this deal <ArrowRight size={14} />
+                              ผ่านดีลนี้ <ArrowRight size={14} />
                             </button>
                           )}
                         </div>
@@ -991,7 +988,7 @@ function App() {
                       onClick={() => setChatOpen(!chatOpen)}
                     >
                       <MessageSquare size={18} />
-                      {chatOpen ? "Close table talk" : "Table talk"}
+                      {chatOpen ? "ปิดแชต" : "แชตในห้อง"}
                     </button>
                     <aside
                       className={`chat-panel panel ${chatOpen ? "drawer-open" : ""}`}
@@ -1002,13 +999,13 @@ function App() {
                           onClick={() => setTab("chat")}
                         >
                           <MessageSquare size={15} />
-                          Table talk
+                          แชตในห้อง
                         </button>
                         <button
                           className={tab === "log" ? "selected" : ""}
                           onClick={() => setTab("log")}
                         >
-                          Activity
+                          เหตุการณ์
                         </button>
                       </div>
                       <div className="messages">
@@ -1022,10 +1019,13 @@ function App() {
                                 <span>
                                   {m.name}
                                   <small>
-                                    {new Date(m.time).toLocaleTimeString([], {
-                                      hour: "2-digit",
-                                      minute: "2-digit",
-                                    })}
+                                    {new Date(m.time).toLocaleTimeString(
+                                      "th-TH",
+                                      {
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                      },
+                                    )}
                                   </small>
                                 </span>
                                 <p>{m.text}</p>
@@ -1034,11 +1034,11 @@ function App() {
                           ) : (
                             <div className="chat-empty">
                               <Handshake size={29} />
-                              <h3>The conversation starts here.</h3>
+                              <h3>เริ่มบทสนทนาได้ที่นี่</h3>
                               <p>
-                                A little persuasion goes a long way.
+                                คำพูดดี ๆ อาจเปลี่ยนทั้งเกม
                                 <br />
-                                Tell the table what you have in mind.
+                                บอกข้อเสนอของคุณให้ทุกคนรู้
                               </p>
                             </div>
                           )
@@ -1052,7 +1052,7 @@ function App() {
                         )}
                       </div>
                       <div className="quick-chat">
-                        {["Deal!", "A little more?", "Not enough."].map((t) => (
+                        {["ตกลง!", "ขอเพิ่มอีกหน่อย!", "น้อยไป!"].map((t) => (
                           <button
                             key={t}
                             onClick={() => action({ type: "CHAT", text: t })}
@@ -1072,32 +1072,30 @@ function App() {
                         }}
                       >
                         <input
-                          aria-label="Chat message"
-                          placeholder="Make your case…"
+                          aria-label="ข้อความแชต"
+                          placeholder="พิมพ์ข้อเสนอของคุณ…"
                           maxLength={300}
                           value={chat}
                           onChange={(e) => setChat(e.target.value)}
                         />
-                        <button aria-label="Send message">
+                        <button aria-label="ส่งข้อความ">
                           <Send size={17} />
                         </button>
                       </form>
                       <div className="chat-note">
                         <ShieldCheck size={12} />
-                        Only your table can see this chat
+                        เฉพาะผู้เล่นในห้องนี้ที่เห็นข้อความ
                       </div>
                     </aside>
                   </div>
                   <section className="hand">
                     <div className="section-title">
                       <div>
-                        <span className="eyebrow">
-                          YOUR COMPETITIVE ADVANTAGE
-                        </span>
-                        <h2>A little influence goes a long way.</h2>
+                        <span className="eyebrow">แต้มต่อในมือคุณ</span>
+                        <h2>การ์ดใบเดียว อาจเปลี่ยนทั้งเกม</h2>
                       </div>
                       <span className="hand-count">
-                        {me?.cards.length} CARDS IN HAND
+                        {me?.cards.length} ใบในมือ
                       </span>
                     </div>
                     <div className="hand-cards">
@@ -1118,13 +1116,13 @@ function App() {
                           <div>
                             <Diamond size={19} />
                             <span>
-                              {c.type === "COUNTER" ? "REACTION" : "INFLUENCE"}
+                              {c.type === "COUNTER" ? "โต้กลับ" : "อิทธิพล"}
                             </span>
                           </div>
-                          <h3>{c.type}</h3>
+                          <h3>{CARD_NAMES[c.type]}</h3>
                           <p>{c.description}</p>
                           <span className="play-label">
-                            PLAY YOUR HAND <ArrowUpRight size={13} />
+                            ใช้การ์ดใบนี้ <ArrowUpRight size={13} />
                           </span>
                         </motion.button>
                       ))}
@@ -1138,47 +1136,42 @@ function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <span className="eyebrow">
-                    A LITTLE KNOWLEDGE. A LOT OF INFLUENCE.
-                  </span>
-                  <h1>Know the game. Own the room.</h1>
-                  <p>
-                    Your guide to becoming the most persuasive person at the
-                    table.
-                  </p>
+                  <span className="eyebrow">รู้กติกา เพิ่มโอกาสชนะ</span>
+                  <h1>เข้าใจกติกา แล้วคุมเกมให้ได้</h1>
+                  <p>คู่มือสู่การเป็นนักเจรจาที่ทุกคนต้องฟัง</p>
                 </div>
               </div>
               <div className="rules-grid">
                 {[
                   [
                     "01",
-                    "Take your seat",
-                    "Create a private room for 3–6 players, share the room code, and ready up. Each player gets investors and four action cards.",
+                    "เข้าร่วมโต๊ะเจรจา",
+                    "สร้างห้องสำหรับ 3–6 คน แชร์รหัสห้องแล้วกดพร้อม ผู้เล่นแต่ละคนจะได้รับนักลงทุนและการ์ดพิเศษ 4 ใบ",
                   ],
                   [
                     "02",
-                    "Find the opportunity",
-                    "The leader changes with every deal. Each project needs specific investors. Their owners, plus the leader, negotiate the proceeds.",
+                    "มองหาโอกาส",
+                    "ผู้นำเปลี่ยนทุกดีล แต่ละโครงการต้องใช้นักลงทุนที่กำหนด ผู้ถือครองนักลงทุนเหล่านั้นและผู้นำต้องเจรจาแบ่งผลประโยชน์ร่วมกัน",
                   ],
                   [
                     "03",
-                    "Name your price",
-                    "The leader allocates the entire deal value. Every participant must accept. A revised offer resets all previous approvals.",
+                    "เสนอส่วนแบ่ง",
+                    "ผู้นำแบ่งเงินให้ครบมูลค่าดีล ทุกคนที่เกี่ยวข้องต้องยอมรับ หากแก้ข้อเสนอ การยอมรับเดิมจะถูกล้างทั้งหมด",
                   ],
                   [
                     "04",
-                    "Change the balance",
-                    "Play influence cards to take control or change participants. Everyone has five seconds to counter. A counter can itself be countered.",
+                    "พลิกความได้เปรียบ",
+                    "ใช้การ์ดเพื่อแย่งอำนาจหรือเปลี่ยนผู้ร่วมดีล ทุกคนมีเวลา 5 วินาทีในการโต้กลับ และสามารถโต้การ์ดโต้กลับซ้ำได้",
                   ],
                   [
                     "05",
-                    "Close before the clock",
-                    "You have 90 seconds per deal. Unanimous agreement pays everyone automatically. A timeout or a pass moves to the next deal.",
+                    "ปิดดีลให้ทันเวลา",
+                    "แต่ละดีลมีเวลา 90 วินาที เมื่อทุกคนตกลง ระบบจ่ายเงินอัตโนมัติ หากหมดเวลาหรือผู้นำกดผ่าน จะไปยังดีลถัดไป",
                   ],
                   [
                     "06",
-                    "Make your fortune",
-                    "After 15 deals, the player with the most money wins. Ties share the same fortune. Practice partners accept valid offers automatically.",
+                    "สะสมความมั่งคั่ง",
+                    "ครบ 15 ดีล ผู้มีเงินมากที่สุดชนะ เงินเท่ากันถือว่าเสมอ คู่แข่งจำลองในโหมดฝึกจะยอมรับข้อเสนอที่ถูกกติกาอัตโนมัติ",
                   ],
                 ].map(([n, h, p]) => (
                   <section className="panel rule" key={n}>
@@ -1195,7 +1188,7 @@ function App() {
                   if (!room) setModal("practice");
                 }}
               >
-                Take a seat <ArrowRight size={17} />
+                เริ่มเล่น <ArrowRight size={17} />
               </button>
             </>
           )}
@@ -1203,16 +1196,16 @@ function App() {
             <>
               <div className="page-heading">
                 <div>
-                  <span className="eyebrow">THE HALL OF INFLUENCE</span>
+                  <span className="eyebrow">ทำเนียบนักเจรจา</span>
                   <h1>
                     {page === "leaderboard"
-                      ? "Great deals. Lasting reputations."
-                      : "Every deal tells a story."}
+                      ? "ดีลสร้างเงิน ฝีมือสร้างชื่อ"
+                      : "ทุกดีลมีเรื่องราว"}
                   </h1>
                   <p>
                     {page === "leaderboard"
-                      ? "The highest fortunes from completed games."
-                      : "A record of the circles, the deals, and the fortunes made."}
+                      ? "สถิติความมั่งคั่งสูงสุดจากเกมที่เล่นจบแล้ว"
+                      : "ย้อนดูเกมที่ผ่านมา พร้อมผลการแข่งขันและเงินสะสม"}
                   </p>
                 </div>
               </div>
@@ -1223,11 +1216,11 @@ function App() {
                   records.map((r, i) => (
                     <div className="rank-row" key={r.id || i}>
                       <span>{String(i + 1).padStart(2, "0")}</span>
-                      <strong>{r.name || `Table ${r.code}`}</strong>
+                      <strong>{r.name || `ห้อง ${r.code}`}</strong>
                       <span>
                         {r.games
-                          ? `${r.games} games`
-                          : new Date(r.ended_at).toLocaleDateString()}
+                          ? `${r.games} เกม`
+                          : new Date(r.ended_at).toLocaleDateString("th-TH")}
                       </span>
                       <b>
                         {r.money
@@ -1239,18 +1232,17 @@ function App() {
                 ) : (
                   <div className="empty-records">
                     <Trophy size={44} />
-                    <h2>The first chapter is yours to write.</h2>
+                    <h2>เป็นคนแรกที่สร้างสถิติ</h2>
                     <p>
-                      Completed games appear here when the match database is
-                      connected.
+                      เกมที่เล่นจบจะแสดงที่นี่เมื่อเชื่อมต่อฐานข้อมูลแล้ว
                       <br />
-                      Take a seat and start building your reputation.
+                      เริ่มเล่นแล้วสร้างชื่อของคุณในวงเจรจา
                     </p>
                     <button
                       className="gold-button"
                       onClick={() => setPage("boardroom")}
                     >
-                      Back to the boardroom <ArrowRight size={16} />
+                      กลับห้องเจรจา <ArrowRight size={16} />
                     </button>
                   </div>
                 )}
@@ -1260,9 +1252,9 @@ function App() {
           <footer>
             <div>
               <Diamond size={13} /> THE INNER CIRCLE{" "}
-              <span>Negotiation is an art. This is your canvas.</span>
+              <span>ทุกคำพูดคือกลยุทธ์ ทุกข้อตกลงคือโอกาส</span>
             </div>
-            <span>Made for good company & better deals.</span>
+            <span>เพื่อนดี ดีลเด็ด เจรจากันให้สนุก</span>
           </footer>
         </div>
       </main>
@@ -1287,7 +1279,7 @@ function App() {
             >
               <button
                 className="close-modal icon-button"
-                aria-label="Close dialog"
+                aria-label="ปิดหน้าต่าง"
                 onClick={() => setModal("")}
               >
                 <X size={21} />
@@ -1297,22 +1289,20 @@ function App() {
                   <div className="modal-emblem">
                     <Diamond size={30} />
                   </div>
-                  <span className="eyebrow">
-                    YOUR INVITATION TO THE INNER CIRCLE
-                  </span>
+                  <span className="eyebrow">คำเชิญสู่วงเจรจาของคุณ</span>
                   <h2 id="modal-title">
                     {modal === "join"
-                      ? "Your seat is waiting."
+                      ? "ที่นั่งของคุณรออยู่"
                       : modal === "practice"
-                        ? "Find your edge."
-                        : "Good company. Great deals."}
+                        ? "ค้นหาชั้นเชิงของคุณ"
+                        : "รวมเพื่อน เปิดโต๊ะ ลุยดีล"}
                   </h2>
                   <p>
                     {modal === "join"
-                      ? "Enter your name and the room code your host shared."
+                      ? "กรอกชื่อของคุณและรหัสห้องที่ได้รับจากเจ้าของห้อง"
                       : modal === "practice"
-                        ? "Practice a full game with three automated partners. They accept valid offers and take turns leading."
-                        : "Create a private table and invite 2–5 friends to play."}
+                        ? "ฝึกเล่นเกมเต็มกับคู่แข่งจำลอง 3 คน ซึ่งจะรับข้อเสนอที่ถูกกติกาและผลัดกันเป็นผู้นำ"
+                        : "สร้างห้องส่วนตัว แล้วชวนเพื่อน 2–5 คนมาเล่นด้วยกัน"}
                   </p>
                   <form
                     onSubmit={(e) => {
@@ -1321,11 +1311,11 @@ function App() {
                     }}
                   >
                     <label>
-                      Your name
+                      ชื่อผู้เล่น
                       <input
                         autoFocus
                         maxLength={20}
-                        placeholder="What should the table call you?"
+                        placeholder="อยากให้เพื่อนเรียกคุณว่าอะไร?"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         required
@@ -1333,11 +1323,11 @@ function App() {
                     </label>
                     {modal === "join" && (
                       <label>
-                        Room code
+                        รหัสห้อง
                         <input
                           maxLength={5}
                           minLength={5}
-                          placeholder="E.g. A7K9Q"
+                          placeholder="เช่น A7K9Q"
                           value={code}
                           onChange={(e) =>
                             setCode(e.target.value.toUpperCase())
@@ -1353,26 +1343,26 @@ function App() {
                         <ArrowRight size={17} />
                       )}{" "}
                       {pending
-                        ? "Preparing your table…"
+                        ? "กำลังเตรียมห้อง…"
                         : modal === "join"
-                          ? "Join the table"
+                          ? "เข้าร่วมห้อง"
                           : modal === "practice"
-                            ? "Start practice"
-                            : "Create private room"}
+                            ? "เริ่มฝึกเล่น"
+                            : "สร้างห้องส่วนตัว"}
                     </button>
                   </form>
                   <div className="modal-foot">
                     <ShieldCheck size={14} />
-                    No account needed. Just a little ambition.
+                    ไม่ต้องสมัครสมาชิก แค่พร้อมเจรจาก็เล่นได้
                   </div>
                 </>
               ) : modal === "offer" ? (
                 <>
-                  <span className="eyebrow">THE ART OF COMPROMISE</span>
-                  <h2 id="modal-title">Make them an offer.</h2>
+                  <span className="eyebrow">หาข้อตกลงที่ลงตัว</span>
+                  <h2 id="modal-title">เสนอส่วนแบ่งของคุณ</h2>
                   <p>
-                    Allocate {money(room!.deal!.value)}. Every required
-                    participant must accept.
+                    แบ่งเงิน {money(room!.deal!.value)}.
+                    ผู้ร่วมดีลทุกคนต้องยอมรับข้อเสนอ
                   </p>
                   {participants.map((id) => (
                     <label className="allocation" key={id}>
@@ -1381,7 +1371,7 @@ function App() {
                       </span>
                       <div>
                         <input
-                          aria-label={`Offer for ${room?.players.find((p) => p.id === id)?.name}`}
+                          aria-label={`ส่วนแบ่งของ ${room?.players.find((p) => p.id === id)?.name}`}
                           type="number"
                           min="0"
                           step="1"
@@ -1393,12 +1383,12 @@ function App() {
                             })
                           }
                         />
-                        <span>THB</span>
+                        <span>บาท</span>
                       </div>
                     </label>
                   ))}
                   <div className="allocation-total">
-                    Allocated{" "}
+                    แบ่งแล้ว{" "}
                     <strong>
                       {money(Object.values(amounts).reduce((a, b) => a + b, 0))}{" "}
                       / {money(room!.deal!.value)}
@@ -1412,20 +1402,22 @@ function App() {
                     }
                     onClick={() => action({ type: "OFFER", amounts })}
                   >
-                    Send offer <Send size={17} />
+                    ส่งข้อเสนอ <Send size={17} />
                   </button>
                 </>
               ) : modal === "play" ? (
                 <>
-                  <span className="eyebrow">CHANGE THE CONVERSATION</span>
-                  <h2 id="modal-title">{selected?.type}</h2>
+                  <span className="eyebrow">เปลี่ยนทิศทางการเจรจา</span>
+                  <h2 id="modal-title">
+                    {selected ? CARD_NAMES[selected.type] : ""}
+                  </h2>
                   <p>
-                    {selected?.description} Playing this card clears the current
-                    offer and opens a five-second counter window.
+                    {selected?.description} การใช้การ์ดนี้จะล้างข้อเสนอปัจจุบัน
+                    และเปิดให้โต้กลับได้ 5 วินาที
                   </p>
                   {selected?.type === "BLOCK" && (
                     <label>
-                      Choose a rival
+                      เลือกคู่แข่ง
                       <select
                         value={target}
                         onChange={(e) => setTarget(e.target.value)}
@@ -1444,7 +1436,7 @@ function App() {
                     selected?.type || "",
                   ) && (
                     <label>
-                      Investor to represent
+                      เลือกนักลงทุนที่จะเป็นตัวแทน
                       <select
                         value={investor}
                         onChange={(e) => setInvestor(e.target.value)}
@@ -1466,31 +1458,31 @@ function App() {
                       })
                     }
                   >
-                    Play card <Swords size={18} />
+                    ใช้การ์ด <Swords size={18} />
                   </button>
                 </>
               ) : modal === "cards" ? (
                 <>
-                  <span className="eyebrow">SIX WAYS TO SHIFT THE BALANCE</span>
-                  <h2 id="modal-title">Influence, in your hands.</h2>
+                  <span className="eyebrow">6 วิธีพลิกสถานการณ์</span>
+                  <h2 id="modal-title">อำนาจต่อรองในมือคุณ</h2>
                   <p>
-                    Play a card during any active deal. A well-timed counter
-                    changes everything.
+                    ใช้การ์ดระหว่างดีลที่กำลังเล่น
+                    การโต้กลับที่ถูกจังหวะอาจเปลี่ยนทุกอย่าง
                   </p>
                   <div className="collection-grid">
                     {Object.entries(CARD_INFO).map(([t, d]) => (
                       <div className="action-card" key={t}>
                         <Diamond size={23} />
-                        <h3>{t}</h3>
+                        <h3>{CARD_NAMES[t as keyof typeof CARD_NAMES]}</h3>
                         <p>{d}</p>
                         <small>
                           {t === "BLOCK"
-                            ? "A blocked rival’s required investors are represented by you."
+                            ? "คุณจะเป็นตัวแทนนักลงทุนที่จำเป็นของคู่แข่งที่ถูกบล็อก"
                             : t === "COUNTER"
-                              ? "Counters resolve last-in, first-out."
+                              ? "การ์ดโต้กลับมีผลย้อนลำดับ จากใบล่าสุดไปใบแรก"
                               : t === "REPLACE INVESTOR"
-                                ? "Choose one required investor; expires next deal."
-                                : "The effect lasts for the current deal."}
+                                ? "เลือกนักลงทุนที่ต้องใช้ 1 ประเภท มีผลเฉพาะดีลนี้"
+                                : "มีผลเฉพาะดีลที่กำลังเล่น"}
                         </small>
                       </div>
                     ))}
@@ -1498,17 +1490,16 @@ function App() {
                 </>
               ) : (
                 <>
-                  <span className="eyebrow">A LITTLE HELP AT THE TABLE</span>
-                  <h2 id="modal-title">Stay in the circle.</h2>
+                  <span className="eyebrow">ตัวช่วยบนโต๊ะเจรจา</span>
+                  <h2 id="modal-title">กลับเข้าวงเจรจาได้เสมอ</h2>
                   <p>
-                    Share your room code to invite friends. If you disconnect,
-                    reopen this page in the same browser to recover your seat
-                    and private cards.
+                    แชร์รหัสห้องเพื่อชวนเพื่อน หากหลุดจากเกม
+                    ให้เปิดหน้านี้ด้วยเบราว์เซอร์เดิม
+                    ระบบจะคืนที่นั่งและการ์ดในมือให้คุณ
                   </p>
                   <p>
-                    Rooms are held in server memory. A server restart ends
-                    active rooms. Completed matches are saved when PostgreSQL is
-                    configured.
+                    ห้องที่กำลังเล่นจะหมดอายุเมื่อเซิร์ฟเวอร์รีสตาร์ต
+                    ส่วนผลเกมที่จบแล้วจะบันทึกไว้เมื่อเชื่อมต่อ PostgreSQL
                   </p>
                   <button
                     className="gold-button full"
@@ -1517,7 +1508,7 @@ function App() {
                       setPage("rules");
                     }}
                   >
-                    Read the game rules <ArrowRight size={16} />
+                    อ่านกติกาเกม <ArrowRight size={16} />
                   </button>
                 </>
               )}
@@ -1537,7 +1528,7 @@ function App() {
             <Diamond size={17} />
             {notice}
             <button
-              aria-label="Dismiss notification"
+              aria-label="ปิดข้อความแจ้งเตือน"
               onClick={() => setNotice("")}
             >
               <X size={16} />

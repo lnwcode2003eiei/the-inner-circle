@@ -24,14 +24,14 @@ app.get("/api/history", async (_, res) => {
   try {
     res.json(await history());
   } catch {
-    res.status(503).json({ error: "Database unavailable" });
+    res.status(503).json({ error: "ฐานข้อมูลไม่พร้อมใช้งาน" });
   }
 });
 app.get("/api/leaderboard", async (_, res) => {
   try {
     res.json(await leaderboard());
   } catch {
-    res.status(503).json({ error: "Database unavailable" });
+    res.status(503).json({ error: "ฐานข้อมูลไม่พร้อมใช้งาน" });
   }
 });
 const server = http.createServer(app);
@@ -59,12 +59,13 @@ io.on("connection", (socket) => {
   const limited = (chat = false) => {
     const now = Date.now();
     stamps = stamps.filter((t) => now - t < 5000);
-    if (stamps.length >= 30) throw new Error("Please slow down.");
+    if (stamps.length >= 30)
+      throw new Error("ส่งคำสั่งเร็วเกินไป กรุณารอสักครู่");
     stamps.push(now);
     if (chat) {
       chats = chats.filter((t) => now - t < 5000);
       if (chats.length >= 5)
-        throw new Error("Please wait before sending another message.");
+        throw new Error("กรุณารอสักครู่ก่อนส่งข้อความถัดไป");
       chats.push(now);
     }
   };
@@ -75,7 +76,7 @@ io.on("connection", (socket) => {
       if (typeof cb === "function") cb(result);
     } catch (e) {
       if (typeof cb === "function")
-        cb({ error: e instanceof Error ? e.message : "Invalid request" });
+        cb({ error: e instanceof Error ? e.message : "คำขอไม่ถูกต้อง" });
     }
   };
   const attach = (r: GameRoom, id: string) => {
@@ -85,14 +86,14 @@ io.on("connection", (socket) => {
   };
   const nameOf = (name: unknown) => {
     if (typeof name !== "string" || !name.trim() || name.trim().length > 20)
-      throw new Error("Enter a name of 1–20 characters.");
+      throw new Error("กรุณากรอกชื่อที่ยาว 1–20 ตัวอักษร");
     return name.trim();
   };
   socket.on("room:create", (data, cb) =>
     guard(cb, () => {
-      if (socket.data.id) throw new Error("Leave your current room first.");
+      if (socket.data.id) throw new Error("กรุณาออกจากห้องเดิมก่อน");
       if (rooms.size >= 500)
-        throw new Error("All tables are occupied. Please try later.");
+        throw new Error("ห้องเต็มทั้งหมด กรุณาลองใหม่ภายหลัง");
       const p = player(nameOf(data?.name), 0);
       let code = "";
       do {
@@ -105,9 +106,9 @@ io.on("connection", (socket) => {
       attach(r, p.id);
       if (data.practice) {
         r.players.push(
-          player("Alex Morgan", 1, true),
-          player("Sofia Chen", 2, true),
-          player("Marcus Reed", 3, true),
+          player("อเล็กซ์ มอร์แกน", 1, true),
+          player("โซเฟีย เฉิน", 2, true),
+          player("มาร์คัส รีด", 3, true),
         );
         start(r);
       }
@@ -117,16 +118,16 @@ io.on("connection", (socket) => {
   );
   socket.on("room:join", (data, cb) =>
     guard(cb, () => {
-      if (socket.data.id) throw new Error("Leave your current room first.");
+      if (socket.data.id) throw new Error("กรุณาออกจากห้องเดิมก่อน");
       const r = rooms.get(String(data?.code).toUpperCase());
       if (!r || r.status !== "lobby" || r.players.length >= 6)
-        throw new Error("Room not found, full, or already playing.");
+        throw new Error("ไม่พบห้อง ห้องเต็ม หรือเกมเริ่มแล้ว");
       const p = player(nameOf(data.name), r.players.length);
       r.players.push(p);
       const token = randomBytes(32).toString("hex");
       sessions.set(token, { code: r.code, id: p.id });
       attach(r, p.id);
-      log(r, `${p.name} joined the table.`);
+      log(r, `${p.name} เข้าร่วมห้องแล้ว`);
       broadcast(r);
       return { token, playerId: p.id, room: view(r, p.id) };
     }),
@@ -136,11 +137,9 @@ io.on("connection", (socket) => {
       const session = sessions.get(data?.token);
       const r = rooms.get(String(data?.code));
       if (!session || session.code !== r?.code)
-        throw new Error(
-          "This session expired. Please create or join a new room.",
-        );
+        throw new Error("ห้องเดิมหมดอายุแล้ว กรุณาสร้างหรือเข้าร่วมห้องใหม่");
       const p = r.players.find((p) => p.id === session.id);
-      if (!p) throw new Error("Player no longer in room.");
+      if (!p) throw new Error("ผู้เล่นไม่ได้อยู่ในห้องนี้แล้ว");
       for (const s of io.sockets.sockets.values())
         if (s.id !== socket.id && s.data.id === p.id) {
           s.data.id = undefined;
@@ -156,15 +155,15 @@ io.on("connection", (socket) => {
   socket.on("player:action", (a, cb) =>
     guard(cb, () => {
       const r = rooms.get(socket.data.code);
-      if (!r || !socket.data.id) throw new Error("Join a room first.");
-      if (!a || typeof a.type !== "string") throw new Error("Invalid action.");
+      if (!r || !socket.data.id) throw new Error("กรุณาเข้าร่วมห้องก่อน");
+      if (!a || typeof a.type !== "string") throw new Error("คำสั่งไม่ถูกต้อง");
       // Process expired turns and response windows before accepting new actions.
       if (tick(r)) broadcast(r);
       if (a.type === "CHAT") limited(true);
       if (a.type === "LEAVE") {
         if (r.status === "playing" && !r.players.some((p) => p.bot))
           throw new Error(
-            "An active seat is preserved. You can reconnect later.",
+            "ที่นั่งของคุณถูกเก็บไว้ กลับมาเชื่อมต่อใหม่ได้ภายหลัง",
           );
         r.players = r.players.filter((p) => p.id !== socket.data.id);
         for (const [token, s] of sessions)

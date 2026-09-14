@@ -6,7 +6,12 @@ import type {
   Player,
   CardType,
 } from "../../../shared/types";
-import { CARD_INFO, DEALS, INVESTORS } from "../../../shared/constants";
+import {
+  CARD_INFO,
+  CARD_NAMES,
+  DEALS,
+  INVESTORS,
+} from "../../../shared/constants";
 export function card(type?: CardType): ActionCard {
   const keys = Object.keys(CARD_INFO) as CardType[];
   const t = type ?? keys[Math.floor(Math.random() * keys.length)];
@@ -75,8 +80,8 @@ export function next(r: GameRoom, success = false) {
     log(
       r,
       success
-        ? "Deal closed. The proceeds have been distributed."
-        : "Deal passed. A new opportunity awaits.",
+        ? "ปิดดีลสำเร็จ แบ่งเงินให้ผู้ร่วมดีลแล้ว"
+        : "ผ่านดีลนี้ พบโอกาสใหม่ในดีลถัดไป",
     );
   r.round++;
   r.offer = undefined;
@@ -87,7 +92,7 @@ export function next(r: GameRoom, success = false) {
   r.extras = [];
   if (r.round > 15) {
     r.status = "finished";
-    log(r, "The session is complete. Final standings are ready.");
+    log(r, "จบเกมแล้ว มาดูอันดับนักเจรจากัน");
     return;
   }
   r.currentPlayerIndex = (r.round - 1) % r.players.length;
@@ -98,7 +103,7 @@ export function next(r: GameRoom, success = false) {
     r.players.forEach((p) => {
       if (p.cards.length < 8) p.cards.push(card());
     });
-  log(r, `${r.players[r.currentPlayerIndex].name} leads ${r.deal.name}.`);
+  log(r, `${r.players[r.currentPlayerIndex].name} นำการเจรจา ${r.deal.name}`);
 }
 export function start(r: GameRoom) {
   r.status = "playing";
@@ -128,10 +133,10 @@ function settle(r: GameRoom) {
 }
 export function act(r: GameRoom, id: string, a: Action) {
   const p = r.players.find((x) => x.id === id);
-  if (!p) throw new Error("You are not in this room.");
+  if (!p) throw new Error("คุณไม่ได้อยู่ในห้องนี้");
   if (a.type === "CHAT") {
     if (typeof a.text !== "string" || !a.text.trim() || a.text.length > 300)
-      throw new Error("Messages must contain 1–300 characters.");
+      throw new Error("ข้อความต้องมีความยาว 1–300 ตัวอักษร");
     r.chat.push({
       id: randomUUID(),
       playerId: id,
@@ -143,7 +148,7 @@ export function act(r: GameRoom, id: string, a: Action) {
     return;
   }
   if (a.type === "READY") {
-    if (r.status !== "lobby") throw new Error("The game has already started.");
+    if (r.status !== "lobby") throw new Error("เกมเริ่มไปแล้ว");
     p.ready = !p.ready;
     return;
   }
@@ -154,42 +159,43 @@ export function act(r: GameRoom, id: string, a: Action) {
       r.players.length < 3 ||
       !r.players.every((x) => x.ready || x.id === id)
     )
-      throw new Error("The host needs 3–6 ready players to begin.");
+      throw new Error("เจ้าของห้องเริ่มเกมได้เมื่อมีผู้เล่นพร้อม 3–6 คน");
     start(r);
     return;
   }
   if (a.type === "AGAIN") {
     if (id !== r.hostId || r.status !== "finished")
-      throw new Error("Only the host can reopen a finished table.");
+      throw new Error("เฉพาะเจ้าของห้องเท่านั้นที่เริ่มเล่นใหม่ได้");
     r.status = "lobby";
     r.players.forEach((x) => (x.ready = !!x.bot));
     return;
   }
-  if (r.status !== "playing" || !r.deal) throw new Error("No active deal.");
+  if (r.status !== "playing" || !r.deal)
+    throw new Error("ยังไม่มีดีลที่กำลังเล่น");
   if (a.type === "PASS") {
     if (id !== r.bossId || r.stack.length)
-      throw new Error("Only the leader may pass with an empty stack.");
+      throw new Error("เฉพาะผู้นำที่กดผ่านได้ และต้องไม่มีการ์ดรอทำงาน");
     next(r);
     return;
   }
   if (a.type === "PLAY_CARD") {
     const c = p.cards.find((x) => x.id === a.cardId);
     if (!c || r.blocked.includes(id))
-      throw new Error("This card is unavailable.");
+      throw new Error("ไม่สามารถใช้การ์ดใบนี้ได้");
     if (c.type === "COUNTER" && !r.stack.length)
-      throw new Error("There is no card to counter.");
+      throw new Error("ยังไม่มีการ์ดให้โต้กลับ");
     if (c.type !== "COUNTER" && r.stack.length)
-      throw new Error("Wait for the stack to resolve, or play a counter.");
+      throw new Error("รอให้การ์ดทำงานเสร็จ หรือใช้การ์ดโต้กลับ");
     if (
       c.type === "BLOCK" &&
       (!r.players.some((x) => x.id === a.target) || a.target === id)
     )
-      throw new Error("Choose another player.");
+      throw new Error("กรุณาเลือกผู้เล่นคนอื่น");
     if (
       ["REPLACE INVESTOR", "WILD INVESTOR"].includes(c.type) &&
       !r.deal.requiredInvestors.includes(a.investor ?? "")
     )
-      throw new Error("Choose a required investor.");
+      throw new Error("กรุณาเลือกนักลงทุนที่ดีลนี้ต้องใช้");
     p.cards = p.cards.filter((x) => x.id !== c.id);
     r.stack.push({
       id: randomUUID(),
@@ -200,13 +206,13 @@ export function act(r: GameRoom, id: string, a: Action) {
     });
     r.stackDeadline = Date.now() + 5000;
     r.offer = undefined;
-    log(r, `${p.name} played ${c.type}.`);
+    log(r, `${p.name} ใช้การ์ด ${CARD_NAMES[c.type]}`);
     return;
   }
-  if (r.stack.length) throw new Error("The card stack is resolving.");
+  if (r.stack.length) throw new Error("กำลังประมวลผลการ์ด");
   if (a.type === "OFFER") {
     if (id !== r.bossId || !a.amounts || typeof a.amounts !== "object")
-      throw new Error("Only the leader can make an offer.");
+      throw new Error("เฉพาะผู้นำดีลเท่านั้นที่เสนอส่วนแบ่งได้");
     const ids = participants(r);
     const entries = Object.entries(a.amounts);
     if (
@@ -216,28 +222,23 @@ export function act(r: GameRoom, id: string, a: Action) {
       ids.some((k) => !Object.hasOwn(a.amounts, k)) ||
       entries.reduce((s, [, v]) => s + v, 0) !== r.deal.value
     )
-      throw new Error(
-        "Allocate the full deal value among the required participants.",
-      );
+      throw new Error("กรุณาแบ่งเงินครบมูลค่าดีลให้ผู้เล่นที่เกี่ยวข้องทุกคน");
     r.offer = { amounts: { ...a.amounts }, accepted: [id], rejected: [] };
-    log(r, `${p.name} made a new offer.`);
+    log(r, `${p.name} เสนอส่วนแบ่งใหม่`);
     settle(r);
     return;
   }
   if (a.type === "ACCEPT" || a.type === "REJECT") {
     if (!r.offer || !participants(r).includes(id))
-      throw new Error("No offer is available for you.");
+      throw new Error("ยังไม่มีข้อเสนอสำหรับคุณ");
     r.offer.accepted = r.offer.accepted.filter((x) => x !== id);
     r.offer.rejected = r.offer.rejected.filter((x) => x !== id);
     r.offer[a.type === "ACCEPT" ? "accepted" : "rejected"].push(id);
-    log(
-      r,
-      `${p.name} ${a.type === "ACCEPT" ? "accepted" : "rejected"} the offer.`,
-    );
+    log(r, `${p.name} ${a.type === "ACCEPT" ? "ยอมรับ" : "ปฏิเสธ"}ข้อเสนอ`);
     settle(r);
     return;
   }
-  throw new Error("Unknown action.");
+  throw new Error("ไม่รู้จักคำสั่งนี้");
 }
 export function tick(r: GameRoom, now = Date.now()) {
   if (r.status !== "playing") return false;
@@ -268,8 +269,8 @@ export function tick(r: GameRoom, now = Date.now()) {
           r.extras.push(id);
           break;
       }
-      log(r, `${base.card.type} resolved.`);
-    } else log(r, `${base.card.type} was countered.`);
+      log(r, `${CARD_NAMES[base.card.type]} มีผลแล้ว`);
+    } else log(r, `${CARD_NAMES[base.card.type]} ถูกโต้กลับ`);
     r.stack = [];
     r.stackDeadline = undefined;
     changed = true;

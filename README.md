@@ -98,3 +98,8 @@ Frontend มีเฉพาะ public server URL ห้ามใส่ DATABASE_
 Active rooms, tokens และ clocks อยู่ใน memory ของ process เดียว Refresh browser กู้สถานะได้ แต่ backend restart/deploy ทำให้ห้องหมดอายุ UI แจ้งให้สร้าง/เข้าห้องใหม่ ใช้ instance ที่ไม่ sleep เพื่อความต่อเนื่อง ก่อนขยายหลาย instance ต้องย้าย room/session store ไป Redis เพิ่ม Socket.IO Redis adapter และ atomic action serialization
 
 ยังไม่ได้เชื่อมบัญชี hosting หรือฐานข้อมูลจริงใน workspace นี้ ต้องตั้งค่าบริการข้างต้นก่อนเล่นผ่านอินเทอร์เน็ต ภาพสถาปัตยกรรม/portraits จาก Unsplash ฟอนต์ Google Fonts โลโก้ SVG และเสียงสร้างสำหรับโปรเจกต์นี้
+
+## ภาษาและธีม
+
+หน้าเกม กติกา การ์ด ข้อความแจ้งเตือน และบันทึกเหตุการณ์ใช้ภาษาไทย แสดงเงินเป็นหน่วยล้านบาทและวันที่/เวลารูปแบบไทย ธีมใช้พื้นขาว เมนูน้ำเงิน ปุ่มหลักสีแดง และรายละเอียดสีทอง ฟอนต์ Noto Sans Thai / Noto Serif Thai ชื่อแบรนด์ The Inner Circle และรหัสนักลงทุน A–F คงเดิม โดยรหัส Socket และกติกาไม่เปลี่ยน
+

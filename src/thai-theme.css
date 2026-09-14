@@ -1,0 +1,1028 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap");
+
+/* White canvas, navy structure, red actions and gold details. */
+:root {
+  font-family: "Noto Sans Thai", sans-serif;
+  color: #172c54;
+  background: #f6f7fb;
+  --gold: #ab7d27;
+  --muted: #66738a;
+  --line: #172c5415;
+  --panel: #fff;
+  color-scheme: light;
+}
+body {
+  background: #f6f7fb;
+}
+button,
+input,
+select {
+  font-family: inherit;
+}
+* {
+  scrollbar-color: #bdc6d6 #eef1f7;
+}
+.sidebar {
+  background: #172c54;
+  border-right: 1px solid #172c54;
+  color: #fff;
+}
+.brand {
+  color: #f4e5c3;
+}
+.brand-symbol,
+.brand-symbol svg {
+  color: #e1bf74;
+}
+.brand-symbol:before {
+  border-color: #d7b56d;
+}
+.club-tag {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #b8c4dc;
+  line-height: 1.8;
+}
+.nav-label {
+  color: #abbad3;
+  font-size: 10px;
+  letter-spacing: 0;
+  margin-top: 42px;
+}
+nav button {
+  font-size: 12px;
+  color: #cbd5e6;
+  gap: 9px;
+}
+nav svg {
+  color: #aebed9;
+}
+nav button.active {
+  background: linear-gradient(90deg, #d52f4540, #d52f4510);
+  color: #fff;
+  box-shadow: inset 3px 0 #dc3d4e;
+}
+nav button.active svg {
+  color: #f0d394;
+}
+nav button:hover {
+  color: #fff;
+  background: #ffffff0d;
+}
+.nav-divider {
+  background: #ffffff15;
+}
+.nav-dot {
+  background: #d9b76b;
+}
+.club-card {
+  background: linear-gradient(130deg, #233b64, #182b4e);
+  border-color: #d4af3750;
+}
+.club-card span,
+.club-card strong {
+  font:
+    14px/1.9 "Noto Serif Thai",
+    serif;
+  color: #f0e1bf;
+}
+.club-card > svg {
+  color: #e1c382;
+}
+.help-link {
+  color: #ced7e8;
+  font-size: 10px;
+}
+.sidebar-foot {
+  border-color: #ffffff15;
+  color: #bcc8dc;
+  font-size: 8px;
+  letter-spacing: 0;
+}
+header {
+  background: #fff;
+  border-bottom: 1px solid #172c5410;
+}
+.breadcrumb {
+  font-size: 11px;
+  color: #6d7890;
+}
+.breadcrumb strong {
+  color: #243b60;
+}
+.breadcrumb svg {
+  color: #8a96aa;
+}
+.live-status {
+  color: #526b64;
+  font-size: 10px;
+}
+.header-divider {
+  background: #172c5415;
+}
+.icon-button {
+  color: #586b88;
+}
+.profile-avatar {
+  background: #f9f2e1;
+  color: #8b6724;
+  border-color: #dac490;
+}
+.profile-name {
+  color: #1d355d;
+  font-size: 11px;
+}
+.profile-name span {
+  color: #727e92;
+  font-size: 9px;
+}
+.page-heading h1 {
+  font:
+    500 32px/1.55 "Noto Serif Thai",
+    serif;
+  letter-spacing: -0.5px;
+  color: #172c54;
+  margin: 8px 0 5px;
+}
+.page-heading p {
+  font-size: 12px;
+  color: #66738a;
+}
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 0.1px;
+  color: #a27932;
+}
+.eyebrow > span {
+  background: #c99d42;
+}
+.edition {
+  font-size: 9px;
+  letter-spacing: 0.3px;
+  color: #94702f;
+  background: #fffaf0;
+  border-color: #d9c490;
+}
+.hero {
+  height: auto;
+  min-height: 410px;
+  border: 1px solid #bfa46d;
+  border-radius: 9px;
+  background: #172c54;
+  box-shadow: 0 12px 35px #172c540e;
+}
+.hero > img {
+  filter: saturate(0.5) brightness(0.78);
+}
+.hero-shade {
+  background:
+    linear-gradient(90deg, #13274efc, #172c54ec 32%, #172c5455 78%),
+    linear-gradient(0deg, #12244dd9, transparent 55%);
+}
+.hero-content {
+  padding: 34px 38px 33px;
+}
+.hero-kicker {
+  color: #e4c989;
+  font-size: 10px;
+  letter-spacing: 0.3px;
+}
+.hero h2 {
+  font:
+    500 48px/1.4 "Noto Serif Thai",
+    serif;
+  letter-spacing: 0;
+  color: #fff;
+  margin: 17px 0 11px;
+}
+.hero h2 em {
+  color: #edcc7e;
+  font-style: normal;
+}
+.hero-content > p {
+  color: #d2dbee;
+  font-size: 12px;
+  line-height: 1.9;
+  max-width: 480px;
+}
+.hero-meta {
+  color: #d3dced;
+  font-size: 10px;
+  gap: 15px;
+  margin-top: 21px;
+}
+.hero-meta svg {
+  width: 14px;
+}
+.hero-seal {
+  border-color: #dfc68880;
+  background: #172c5433;
+  width: 83px;
+  height: 93px;
+}
+.hero-seal span {
+  font-size: 10px;
+  letter-spacing: 0;
+  line-height: 1.8;
+}
+.hero-bottom-label {
+  font-size: 8px;
+  letter-spacing: 0.3px;
+  color: #ece2c9;
+}
+.hero-bottom-label span {
+  color: #d8e0ea;
+}
+.gold-button {
+  background: linear-gradient(110deg, #cc293f, #b31e35);
+  color: #fff;
+  border: 1px solid #bf293e;
+  box-shadow: 0 4px 12px #be26311c;
+  font-size: 12px;
+  min-height: 44px;
+  padding: 11px 18px;
+}
+.gold-button:hover {
+  background: linear-gradient(110deg, #b82237, #a21a30);
+  filter: none;
+  box-shadow: 0 6px 18px #be263133;
+}
+.glass-button {
+  background: #ffffff0a;
+  border-color: #f2e6ce60;
+  color: #fff;
+  font-size: 12px;
+}
+.outline-button {
+  background: #fff;
+  border-color: #b9c5d8;
+  color: #1c396a;
+  font-size: 12px;
+}
+.outline-button:hover {
+  background: #edf2fa;
+}
+.text-button {
+  color: #a02338;
+  font-size: 11px;
+}
+.hero-buttons {
+  margin-top: 22px;
+}
+.gold-button:disabled {
+  opacity: 0.45;
+}
+.feature-strip {
+  border-bottom-color: #172c5415;
+  gap: 15px;
+  padding: 26px 0;
+}
+.feature-icon {
+  background: #fff;
+  border-color: #d6be8b;
+  color: #a67c2b;
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+}
+.feature-strip strong {
+  font-size: 11px;
+  color: #213b64;
+}
+.feature-strip small {
+  font-size: 10px;
+  color: #67758b;
+  line-height: 1.8;
+  margin-top: 3px;
+}
+.section-title .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #94702f;
+}
+.section-title h2 {
+  font:
+    500 23px/1.6 "Noto Serif Thai",
+    serif;
+  color: #172c54;
+}
+.path-card {
+  background: linear-gradient(145deg, #fff, #fafbfe);
+  border-color: #dce2ec;
+  border-top: 3px solid #c5a35c;
+  box-shadow: 0 3px 12px #172c5403;
+  padding: 23px 21px 0;
+}
+.path-card:nth-child(2) {
+  border-top-color: #c62d43;
+}
+.path-card:nth-child(3) {
+  border-top-color: #223f73;
+}
+.path-card:hover {
+  border-color: #c8af77;
+  box-shadow: 0 10px 25px #172c540b;
+}
+.path-icon {
+  color: #26477d;
+}
+.small-tag {
+  font-size: 8px;
+  letter-spacing: 0;
+  background: #fff8e9;
+  border-color: #dfcb9e;
+  color: #8f6c2a;
+}
+.path-card h3 {
+  font:
+    500 22px/1.6 "Noto Serif Thai",
+    serif;
+  color: #1b345e;
+}
+.path-card p {
+  font-size: 11px;
+  line-height: 1.9;
+  color: #69758b;
+  margin: 9px 0 20px;
+}
+.path-link {
+  font-size: 10px;
+  color: #b12a40;
+  border-top-color: #172c5410;
+}
+.path-number {
+  color: #172c5405;
+}
+.mini-cards span {
+  background: #fff;
+  border-color: #d2b477;
+  color: #bd2b40;
+}
+.quote {
+  font:
+    400 14px/1.9 "Noto Serif Thai",
+    serif;
+  color: #788198;
+  margin: 26px 0;
+}
+.quote span {
+  color: #b38c42;
+}
+footer {
+  border-color: #172c5412;
+  color: #78859b;
+  font-size: 9px;
+}
+footer > div,
+footer > div span {
+  font-size: 8px;
+  letter-spacing: 0;
+}
+footer > div span {
+  border-color: #172c5420;
+}
+.panel {
+  background: #fff;
+  border-color: #dce3ed;
+  box-shadow: 0 5px 18px #172c5404;
+}
+.panel-title h2 {
+  font:
+    500 24px/1.5 "Noto Serif Thai",
+    serif;
+  color: #1b345e;
+}
+.panel-title > span {
+  color: #687990;
+  font-size: 11px;
+}
+.lobby-player strong {
+  color: #233b63;
+  font-size: 13px;
+}
+.lobby-player > div > span {
+  font-size: 11px;
+  color: #6a7b91;
+}
+.lobby-player {
+  border-color: #e9edf3;
+}
+.ready-pill {
+  color: #296347;
+  border-color: #b5d5c2;
+  background: #edf8f1;
+  font-size: 10px;
+}
+.waiting-pill {
+  color: #927038;
+  background: #fffaed;
+  border-color: #e4d4b0;
+  font-size: 10px;
+}
+.empty-seat {
+  color: #6c7c95;
+  border-color: #c9d3e2;
+  background: #f8faff;
+  font-size: 12px;
+}
+.lobby-settings {
+  color: #a67b2d;
+}
+.lobby-settings h2 {
+  font: 500 26px/1.6 "Noto Serif Thai";
+  color: #19345e;
+}
+.lobby-settings p {
+  color: #6b7890;
+  font-size: 12px;
+}
+.room-code {
+  color: #213f70;
+}
+.game-top {
+  background: #172c54;
+  border-color: #243d68;
+}
+.game-top > span {
+  color: #c5d0e3;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.game-top b,
+.game-top svg {
+  color: #efd496;
+}
+.urgent b {
+  color: #ff9caa;
+}
+.players-column > .eyebrow {
+  font-size: 10px;
+}
+.player-panel {
+  background: #fff;
+  border-color: #dce3ed;
+}
+.player-panel.leader {
+  background: linear-gradient(120deg, #fffaee, #fff);
+  border-color: #c8a963;
+}
+.player-top strong {
+  color: #213b63;
+  font-size: 11px;
+}
+.player-top small {
+  color: #6c7c94;
+  font-size: 9px;
+}
+.player-money {
+  color: #203d6b;
+  font-size: 23px;
+}
+.player-money > span {
+  color: #6c7c94;
+}
+.investor-chip {
+  background: #f9f2e2;
+  color: #8c6928;
+  border-color: #d9c593;
+}
+.investor-row small {
+  font-size: 9px;
+  color: #2e7753;
+}
+.deal-card {
+  background: #fff;
+  border-color: #d7be89;
+}
+.deal-image:after {
+  background: linear-gradient(0deg, #fff, transparent 65%);
+}
+.deal-image .small-tag {
+  color: #f6e7c5;
+  background: #172c54cf;
+  border-color: #d7bb75;
+}
+.deal-index {
+  color: #fff1d1;
+}
+.deal-body > .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.deal-body > h2 {
+  font: 500 28px/1.6 "Noto Serif Thai";
+  color: #17325e;
+  margin: 10px 0 14px;
+}
+.deal-value {
+  font: 500 38px/1.5 "Noto Serif Thai";
+  color: #ac7b23;
+}
+.deal-value > span {
+  font: 11px "Noto Sans Thai";
+  color: #748096;
+  letter-spacing: 0;
+  margin-top: 5px;
+}
+.deal-requirements {
+  border-color: #e4e9f0;
+}
+.deal-requirements > span {
+  font-size: 10px;
+  color: #6a7790;
+  letter-spacing: 0;
+}
+.deal-requirements small {
+  font-size: 10px;
+  color: #78869a;
+}
+.deal-cta > p {
+  color: #63738a;
+  font-size: 12px;
+}
+.pass-button {
+  font-size: 10px;
+}
+.current-offer > div:not(.eyebrow):not(.offer-actions) {
+  font-size: 11px;
+  color: #586c86;
+}
+.current-offer b {
+  color: #a37625;
+}
+.current-offer svg {
+  color: #38785c;
+}
+.offer-actions button {
+  font-size: 11px;
+}
+.stack-banner {
+  color: #a2263d;
+  background: #fff1f3;
+  border-radius: 4px;
+  font-size: 12px;
+}
+.chat-tabs {
+  border-color: #e3e9f1;
+}
+.chat-tabs button {
+  color: #6a7c95;
+  font-size: 11px;
+}
+.chat-tabs button.selected {
+  color: #b2263c;
+  border-bottom-color: #bf2941;
+}
+.chat-empty {
+  color: #b49553;
+}
+.chat-empty h3 {
+  font: 500 19px/1.7 "Noto Serif Thai";
+  color: #2a4269;
+}
+.chat-empty p {
+  font-size: 11px;
+  color: #728098;
+}
+.quick-chat {
+  flex-wrap: wrap;
+}
+.quick-chat button {
+  color: #274573;
+  background: #f0f4fb;
+  border-color: #d9e1ec;
+  font-size: 10px;
+}
+.chat-input {
+  background: #f8faff;
+  border-color: #cfd9e6;
+}
+.chat-input input {
+  color: #20385f;
+  font-size: 12px;
+}
+.chat-input button {
+  color: #b82a41;
+}
+.chat-note {
+  font-size: 9px;
+  color: #79869b;
+}
+.message > span {
+  font-size: 11px;
+  color: #a2752e;
+}
+.message > span > small {
+  font-size: 9px;
+  color: #8390a4;
+}
+.message > p {
+  background: #f0f4fb;
+  color: #334e76;
+  font-size: 12px;
+}
+.message.mine > p {
+  background: #fff2ed;
+}
+.log-entry p {
+  color: #64758e;
+  font-size: 11px;
+}
+.hand-count {
+  color: #6d7c93;
+  font-size: 10px;
+  letter-spacing: 0;
+}
+.action-card {
+  background: linear-gradient(145deg, #fff, #edf2fb);
+  color: #26477d;
+  border-color: #bac9e1;
+  min-width: 172px;
+}
+.action-card > div > span {
+  font-size: 9px;
+  letter-spacing: 0;
+}
+.action-card h3 {
+  font-size: 16px;
+  letter-spacing: 0;
+  line-height: 1.6;
+}
+.action-card p {
+  font-size: 11px;
+  color: #64748e;
+  min-height: 43px;
+}
+.play-label {
+  color: #284879;
+  font-size: 9px;
+  letter-spacing: 0;
+  border-color: #172c5415;
+}
+.card-block {
+  background: linear-gradient(145deg, #fff, #fcecef);
+  color: #ae263e;
+  border-color: #e9b9c1;
+}
+.card-counter {
+  background: linear-gradient(145deg, #fff, #e9f0fd);
+  color: #234b86;
+  border-color: #b9ccec;
+}
+.card-wild {
+  background: linear-gradient(145deg, #fff, #fff4dc);
+  color: #a27825;
+  border-color: #e0cb98;
+}
+.collection-grid .action-card small {
+  font-size: 10px;
+  color: #68798e;
+  border-color: #172c5415;
+}
+.modal-backdrop {
+  background: #0a1b3e9e;
+}
+.modal {
+  background: linear-gradient(135deg, #fff, #f8faff);
+  border: 1px solid #d4bd84;
+  box-shadow: 0 25px 90px #091b4a40;
+}
+.modal h2 {
+  font: 500 28px/1.6 "Noto Serif Thai";
+  color: #1b345e;
+}
+.modal .eyebrow {
+  font-size: 9px;
+  letter-spacing: 0;
+  color: #967032;
+}
+.modal > p {
+  color: #64738a;
+  font-size: 13px;
+}
+.modal label {
+  font-size: 12px;
+  color: #2d446c;
+}
+.modal input,
+.modal select {
+  background: #fff;
+  border-color: #cbd5e4;
+  color: #203960;
+  font-size: 13px;
+}
+.modal input:focus,
+.modal select:focus {
+  border-color: #b28b3d;
+  box-shadow: 0 0 0 3px #d4af3714;
+}
+.modal-foot {
+  font-size: 10px;
+  color: #728198;
+}
+.allocation-total {
+  font-size: 12px;
+  color: #6b7990;
+}
+.allocation-total strong {
+  color: #9f7327;
+}
+.allocation > div > span {
+  font-size: 10px;
+  color: #74839b;
+}
+.toast {
+  background: #172c54;
+  color: #fff;
+  border-color: #c6a65f;
+  font-size: 12px;
+}
+.toast > svg {
+  color: #e4c57f;
+}
+.rule > span {
+  color: #b58a37;
+}
+.rule h2 {
+  font: 500 22px/1.6 "Noto Serif Thai";
+  color: #223d66;
+}
+.rule p {
+  font-size: 12px;
+  color: #66768f;
+}
+.empty-records h2 {
+  font: 500 28px/1.7 "Noto Serif Thai";
+  color: #1c385f;
+}
+.empty-records p {
+  font-size: 12px;
+  color: #72829a;
+}
+.rank-row {
+  border-color: #e4eaf3;
+  color: #26416c;
+}
+.rank-row > b {
+  color: #a2782a;
+}
+.results > h2 {
+  font: 500 28px/1.7 "Noto Serif Thai";
+  color: #203c67;
+}
+@media (min-width: 1500px) {
+  .hero-content {
+    padding: 40px 45px;
+  }
+  .hero h2 {
+    font-size: 55px;
+  }
+  .hero {
+    min-height: 450px;
+  }
+  .hero-content > p {
+    font-size: 14px;
+  }
+  .path-card h3 {
+    font-size: 25px;
+  }
+  .feature-strip strong {
+    font-size: 13px;
+  }
+  .feature-strip small {
+    font-size: 11px;
+  }
+  .path-card p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 1150px) {
+  .feature-strip {
+    gap: 12px;
+  }
+  .feature-strip strong {
+    font-size: 10px;
+  }
+  .feature-strip small {
+    font-size: 9px;
+  }
+  .path-card {
+    padding: 20px 16px 0;
+  }
+  .path-card h3 {
+    font-size: 20px;
+  }
+  .path-card p {
+    font-size: 10px;
+  }
+  .small-tag {
+    font-size: 7px;
+  }
+  .sidebar {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+  nav button {
+    font-size: 11px;
+    padding-left: 9px;
+    padding-right: 9px;
+  }
+  .hero-content > p {
+    max-width: 360px;
+  }
+}
+@media (max-width: 850px) {
+  nav button {
+    font-size: 0;
+    padding: 14px;
+  }
+  .page-heading h1 {
+    font-size: 27px;
+  }
+  .feature-strip {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+  .feature-strip strong {
+    font-size: 12px;
+  }
+  .feature-strip small {
+    font-size: 11px;
+  }
+  .path-cards {
+    grid-template-columns: 1fr;
+  }
+  .path-card h3 {
+    font-size: 23px;
+  }
+  .path-card p {
+    font-size: 12px;
+  }
+  .path-top {
+    margin-bottom: 15px;
+  }
+  .path-link {
+    font-size: 12px;
+  }
+  .hero-seal {
+    display: none;
+  }
+  .hero-content > p {
+    max-width: 350px;
+  }
+  .section-title h2 {
+    font-size: 22px;
+  }
+}
+@media (max-width: 600px) {
+  .sidebar {
+    padding: 0 18px;
+  }
+  .sidebar nav button {
+    font-size: 0;
+  }
+  .page-heading h1 {
+    font-size: 25px;
+    line-height: 1.6;
+  }
+  .page-heading p {
+    font-size: 11px;
+  }
+  .eyebrow {
+    font-size: 9px;
+  }
+  .hero {
+    min-height: 405px;
+  }
+  .hero-content {
+    padding: 27px 22px;
+  }
+  .hero h2 {
+    font-size: 38px;
+    line-height: 1.5;
+    margin-top: 17px;
+  }
+  .hero-kicker {
+    font-size: 9px;
+  }
+  .hero-content > p {
+    font-size: 11px;
+    max-width: 265px;
+  }
+  .hero-meta {
+    gap: 9px;
+    font-size: 9px;
+  }
+  .gold-button,
+  .glass-button {
+    font-size: 11px;
+    padding: 10px 13px;
+  }
+  .section-title h2 {
+    font-size: 21px;
+    max-width: 225px;
+  }
+  .section-title .text-button {
+    font-size: 10px;
+  }
+  .feature-strip strong {
+    font-size: 12px;
+  }
+  .feature-strip small {
+    font-size: 10px;
+  }
+  .path-card .small-tag {
+    font-size: 8px;
+  }
+  .quote {
+    font-size: 12px;
+  }
+  .breadcrumb {
+    font-size: 9px;
+  }
+  .live-status {
+    font-size: 9px;
+  }
+  .game-top > span {
+    font-size: 8px;
+    gap: 4px;
+  }
+  .game-top b {
+    font-size: 10px;
+  }
+  .deal-body > h2 {
+    font-size: 26px;
+  }
+  .deal-value {
+    font-size: 33px;
+  }
+  .player-top strong {
+    font-size: 11px;
+  }
+  .player-money {
+    font-size: 21px;
+  }
+  .hand-cards .action-card {
+    min-width: 175px;
+  }
+  .hand .section-title h2 {
+    font-size: 21px;
+  }
+  .hand-count {
+    font-size: 8px;
+  }
+  .modal h2 {
+    font-size: 25px;
+  }
+  .modal .eyebrow {
+    font-size: 9px;
+  }
+  .collection-grid {
+    grid-template-columns: 1fr;
+  }
+  .collection-grid .action-card {
+    padding: 20px;
+  }
+  .collection-grid .action-card p {
+    max-width: none;
+    min-height: 0;
+  }
+  .modal-backdrop:has(.allocation) {
+    padding: 0;
+  }
+  .allocation-total {
+    font-size: 11px;
+  }
+  .lobby-player strong {
+    font-size: 12px;
+  }
+  .lobby-player > div > span {
+    font-size: 10px;
+  }
+  .empty-seat {
+    font-size: 11px;
+  }
+  footer > div,
+  footer > div span {
+    font-size: 7px;
+  }
+  .rule h2 {
+    font-size: 22px;
+  }
+  .toast {
+    font-size: 11px;
+  }
+  .mobile-chat-toggle {
+    border-color: #b9253b;
+  }
+  .game-layout > .chat-panel.drawer-open {
+    background: #fff;
+    box-shadow: 0 0 0 100vmax #091b3da0;
+  }
+  .rank-row {
+    font-size: 11px;
+  }
+  .results > h2 {
+    font-size: 25px;
+  }
+}
