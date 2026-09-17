@@ -1,0 +1,79 @@
+.trading-card {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-family: "Noto Sans Thai", sans-serif;
+  filter: drop-shadow(0 7px 9px #17203330);
+}
+.tcg-hand-card {
+  position: relative;
+  flex: 0 0 235px;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 11px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  transition: filter 0.2s;
+}
+.tcg-hand-card:hover {
+  filter: brightness(1.06);
+}
+.tcg-hand-card:focus-visible {
+  outline: 3px solid #ba842d;
+  outline-offset: 5px;
+}
+.tcg-hand-card::after {
+  content: "แตะเพื่อดูรายละเอียด / ใช้การ์ด";
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 33%;
+  padding: 6px;
+  background: #13223ae8;
+  color: #fff4d6;
+  font:
+    11px "Noto Sans Thai",
+    sans-serif;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+}
+.tcg-hand-card:hover::after,
+.tcg-hand-card:focus-visible::after {
+  opacity: 1;
+}
+.tcg-collection {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+  margin-top: 24px;
+}
+.tcg-preview {
+  max-width: 300px;
+  margin: 16px auto 22px;
+}
+@media (min-width: 1050px) {
+  .modal.wide:has(.tcg-collection) {
+    width: 980px;
+    max-width: 94vw;
+  }
+  .tcg-collection {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 600px) {
+  .tcg-hand-card {
+    flex-basis: 225px;
+  }
+  .tcg-collection {
+    grid-template-columns: minmax(0, 300px);
+    justify-content: center;
+    gap: 24px;
+  }
+  .tcg-preview {
+    max-width: 290px;
+  }
+}

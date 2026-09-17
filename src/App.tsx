@@ -35,10 +35,10 @@ import type { Action, ActionCard, GameRoom, Reply } from "../shared/types";
 import {
   CARD_INFO,
   CARD_NAMES,
-  CARD_ART,
   INVESTORS,
   totalDealsFor,
 } from "../shared/constants";
+import { TradingCard } from "./components/TradingCard";
 import "./index.css";
 import "./thai-theme.css";
 const money = (n: number) =>
@@ -1215,7 +1215,10 @@ function App() {
                         <motion.button
                           whileHover={{ y: -7 }}
                           key={c.id}
-                          className={`action-card card-${c.type.split(" ")[0].toLowerCase()}`}
+                          className="tcg-hand-card"
+                          aria-label={
+                            CARD_NAMES[c.type] + " — ดูรายละเอียดและใช้การ์ด"
+                          }
                           onClick={() => {
                             setSelected(c);
                             setTarget(
@@ -1230,22 +1233,7 @@ function App() {
                             setModal("play");
                           }}
                         >
-                          <div>
-                            <Diamond size={19} />
-                            <span>
-                              {c.type === "COUNTER" ? "โต้กลับ" : "อิทธิพล"}
-                            </span>
-                          </div>
-                          <img
-                            className="card-art"
-                            src={`/art/${CARD_ART[c.type]}.png`}
-                            alt={CARD_NAMES[c.type]}
-                          />
-                          <h3>{CARD_NAMES[c.type]}</h3>
-                          <p>{c.description}</p>
-                          <span className="play-label">
-                            ใช้การ์ดใบนี้ <ArrowUpRight size={13} />
-                          </span>
+                          <TradingCard type={c.type} />
                         </motion.button>
                       ))}
                     </div>
@@ -1579,9 +1567,14 @@ function App() {
                   <h2 id="modal-title">
                     {selected ? CARD_NAMES[selected.type] : ""}
                   </h2>
+                  {selected && (
+                    <div className="tcg-preview">
+                      <TradingCard type={selected.type} />
+                    </div>
+                  )}
                   <p>
-                    {selected?.description} การใช้การ์ดนี้จะล้างข้อเสนอปัจจุบัน
-                    และเปิดให้โต้กลับได้ 5 วินาที
+                    เลือกเป้าหมายด้านล่าง (ถ้ามี) แล้วกดใช้การ์ด
+                    ผลจะเกิดเมื่อช่วงโต้กลับสิ้นสุด และดิลยังไม่หมดเวลา
                   </p>
                   {["BLOCK", "REPLACE INVESTOR"].includes(
                     selected?.type ?? "",
@@ -1612,7 +1605,9 @@ function App() {
                     selected?.type || "",
                   ) && (
                     <label>
-                      เลือกนักลงทุนที่จะเป็นตัวแทน
+                      {selected?.type === "REPLACE INVESTOR"
+                        ? "เลือกนักลงทุนที่จะยึด"
+                        : "เลือกนักลงทุนชั่วคราว"}
                       <select
                         value={investor}
                         onChange={(e) => setInvestor(e.target.value)}
@@ -1653,27 +1648,9 @@ function App() {
                     ใช้การ์ดระหว่างดีลที่กำลังเล่น
                     การโต้กลับที่ถูกจังหวะอาจเปลี่ยนทุกอย่าง
                   </p>
-                  <div className="collection-grid">
-                    {Object.entries(CARD_INFO).map(([t, d]) => (
-                      <div className="action-card" key={t}>
-                        <Diamond size={23} />
-                        <img
-                          className="card-art"
-                          src={`/art/${CARD_ART[t as keyof typeof CARD_ART]}.png`}
-                          alt={CARD_NAMES[t as keyof typeof CARD_NAMES]}
-                        />
-                        <h3>{CARD_NAMES[t as keyof typeof CARD_NAMES]}</h3>
-                        <p>{d}</p>
-                        <small>
-                          {t === "BLOCK"
-                            ? "คู่แข่งถูกกันออกจากดีล ผู้นำต้องเลือกผู้ร่วมดีลใหม่"
-                            : t === "COUNTER"
-                              ? "การ์ดโต้กลับมีผลย้อนลำดับ จากใบล่าสุดไปใบแรก"
-                              : t === "REPLACE INVESTOR"
-                                ? "ยึดนักลงทุนจริงจากคู่แข่ง ไม่คืนเมื่อจบดีล และถูกยึดต่อได้"
-                                : "มีผลเฉพาะดีลที่กำลังเล่น"}
-                        </small>
-                      </div>
+                  <div className="tcg-collection">
+                    {Object.keys(CARD_INFO).map((t) => (
+                      <TradingCard key={t} type={t as ActionCard["type"]} />
                     ))}
                   </div>
                 </>
