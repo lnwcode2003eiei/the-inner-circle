@@ -30,6 +30,7 @@ export interface Deal {
   value: number;
   requiredInvestors: string[];
   difficulty: string;
+  artwork: string;
 }
 export interface Offer {
   amounts: Record<string, number>;
@@ -58,7 +59,10 @@ export interface GameRoom {
   stack: StackEntry[];
   stackDeadline?: number;
   blocked: string[];
-  replacements: Record<string, string>;
+  assignments: Record<string, string>;
+  wildInvestors: Record<string, string[]>;
+  deck: Deal[];
+  totalDeals: number;
   extras: string[];
   chat: {
     id: string;
@@ -74,6 +78,7 @@ export type Action =
   | { type: "READY" }
   | { type: "START" }
   | { type: "LEAVE" }
+  | { type: "SELECT_INVESTORS"; assignments: Record<string, string> }
   | { type: "OFFER"; amounts: Record<string, number> }
   | { type: "ACCEPT" }
   | { type: "REJECT" }

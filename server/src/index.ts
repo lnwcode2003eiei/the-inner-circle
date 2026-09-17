@@ -120,7 +120,7 @@ io.on("connection", (socket) => {
     guard(cb, () => {
       if (socket.data.id) throw new Error("กรุณาออกจากห้องเดิมก่อน");
       const r = rooms.get(String(data?.code).toUpperCase());
-      if (!r || r.status !== "lobby" || r.players.length >= 6)
+      if (!r || r.status !== "lobby" || r.players.length >= 12)
         throw new Error("ไม่พบห้อง ห้องเต็ม หรือเกมเริ่มแล้ว");
       const p = player(nameOf(data.name), r.players.length);
       r.players.push(p);

@@ -4,103 +4,160 @@ import {
   act,
   card,
   newRoom,
-  participants,
   player,
   start,
   tick,
   view,
+  eligible,
+  participants,
 } from "./engine";
-function fixture() {
-  const p = player("One", 0);
-  const r = newRoom("TEST1", p);
-  r.players.push(player("Two", 1), player("Three", 2));
+function fixture(n = 6) {
+  const r = newRoom("TEST", player("Host", 0));
+  for (let i = 1; i < n; i++) r.players.push(player("P" + i, i));
   start(r);
   return r;
 }
-function offer(r: ReturnType<typeof fixture>) {
-  const ids = participants(r),
-    share = Math.floor(r.deal!.value / ids.length);
-  return Object.fromEntries(
-    ids.map((id, i) => [
-      id,
-      share + (i === 0 ? r.deal!.value - share * ids.length : 0),
-    ]),
-  );
+function select(r: ReturnType<typeof fixture>) {
+  act(r, r.bossId, {
+    type: "SELECT_INVESTORS",
+    assignments: Object.fromEntries(
+      r.deal!.requiredInvestors.map((i) => [
+        i,
+        r.players.find((p) => eligible(r, p.id, i))!.id,
+      ]),
+    ),
+  });
 }
-test("invalid and unauthorized offers fail; revisions reset approvals", () => {
-  const r = fixture();
-  assert.throws(() =>
-    act(r, r.players[1].id, { type: "OFFER", amounts: offer(r) }),
-  );
-  assert.throws(() =>
-    act(r, r.bossId, { type: "OFFER", amounts: { [r.bossId]: 999999999 } }),
-  );
-  act(r, r.bossId, { type: "OFFER", amounts: offer(r) });
-  act(r, r.players[1].id, { type: "ACCEPT" });
-  act(r, r.bossId, { type: "OFFER", amounts: offer(r) });
-  assert.deepEqual(r.offer!.accepted, [r.bossId]);
-  assert.throws(() => act(r, "outsider", { type: "ACCEPT" }));
-});
-test("unanimous agreement pays exactly once", () => {
-  const r = fixture(),
-    value = r.deal!.value;
-  act(r, r.bossId, { type: "OFFER", amounts: offer(r) });
-  for (const p of r.players.slice(1)) act(r, p.id, { type: "ACCEPT" });
-  assert.equal(r.round, 2);
-  assert.equal(
-    r.players.reduce((s, p) => s + p.money, 0),
-    value,
-  );
-  assert.throws(() => act(r, r.players[1].id, { type: "ACCEPT" }));
-  assert.equal(
-    r.players.reduce((s, p) => s + p.money, 0),
-    value,
-  );
-});
-test("counter chains resolve last-in first-out", () => {
-  for (const counters of [1, 2]) {
-    const r = fixture(),
-      old = r.bossId,
-      attacker = r.players[1];
-    const c = card("TAKE CONTROL");
-    attacker.cards.push(c);
-    act(r, attacker.id, { type: "PLAY_CARD", cardId: c.id });
-    for (let i = 0; i < counters; i++) {
-      const p = r.players[i],
-        counter = card("COUNTER");
-      p.cards.push(counter);
-      act(r, p.id, { type: "PLAY_CARD", cardId: counter.id });
-    }
-    tick(r, r.stackDeadline! + 1);
-    assert.equal(r.bossId, counters === 1 ? old : attacker.id);
-    assert.equal(r.stack.length, 0);
+function play(
+  r: ReturnType<typeof fixture>,
+  id: string,
+  type: Parameters<typeof card>[0],
+  target?: string,
+  investor?: string,
+) {
+  const c = card(type);
+  r.players.find((p) => p.id === id)!.cards.push(c);
+  act(r, id, { type: "PLAY_CARD", cardId: c.id, target, investor });
+}
+test("balanced A–F and unique deck for 3–12 players", () => {
+  for (let n = 3; n <= 12; n++) {
+    const r = fixture(n),
+      letters = r.players.flatMap((p) => p.investors);
+    assert.equal(new Set(letters).size, 6);
+    assert.ok(
+      Math.max(...r.players.map((p) => p.investors.length)) -
+        Math.min(...r.players.map((p) => p.investors.length)) <=
+        1,
+    );
+    assert.ok(letters.every((i) => letters.filter((x) => x === i).length <= 2));
+    assert.equal(r.totalDeals, n <= 6 ? 15 : n <= 9 ? 20 : 25);
+    assert.equal(new Set(r.deck.map((d) => d.id)).size, r.totalDeals);
+    assert.equal(r.bossId, r.players[0].id);
+    assert.deepEqual(view(r, r.bossId).deck, []);
+    assert.equal(view(r, r.bossId).players[1].cards.length, 0);
   }
 });
-test("private hand projection and timeout", () => {
+test("explicit duplicate owner selection and permission checks", () => {
+  const r = fixture(12);
+  assert.throws(() =>
+    act(r, r.bossId, { type: "OFFER", amounts: { [r.bossId]: r.deal!.value } }),
+  );
+  select(r);
+  const letter = r.deal!.requiredInvestors[0],
+    owners = r.players.filter((p) => p.investors.includes(letter));
+  assert.equal(owners.length, 2);
+  act(r, r.bossId, {
+    type: "SELECT_INVESTORS",
+    assignments: { ...r.assignments, [letter]: owners[1].id },
+  });
+  assert.equal(r.assignments[letter], owners[1].id);
+  assert.throws(() =>
+    act(r, r.players[1].id, { type: "SELECT_INVESTORS", assignments: {} }),
+  );
+  assert.throws(() =>
+    act(r, r.bossId, {
+      type: "SELECT_INVESTORS",
+      assignments: { Z: r.bossId },
+    }),
+  );
+});
+test("wild expires but stolen real investor persists", () => {
   const r = fixture(),
-    v = view(r, r.players[0].id);
-  assert.equal(v.players[0].cards.length, 4);
-  assert.equal(v.players[1].cards.length, 0);
-  assert.equal(v.players[1].cardCount, 4);
+    a = r.players[0],
+    b = r.players[1],
+    letter = b.investors[0];
+  play(r, a.id, "WILD INVESTOR", undefined, letter);
+  tick(r, r.stackDeadline! + 1);
+  assert.ok(r.wildInvestors[a.id].includes(letter));
+  assert.throws(() => play(r, b.id, "REPLACE INVESTOR", a.id, letter));
+  play(r, a.id, "REPLACE INVESTOR", b.id, letter);
+  tick(r, r.stackDeadline! + 1);
+  assert.ok(a.investors.includes(letter));
+  assert.ok(!b.investors.includes(letter));
+  assert.deepEqual(r.assignments, {});
   tick(r, r.turnStartedAt + r.turnDuration + 1);
-  assert.equal(r.round, 2);
-  assert.equal(r.bossId, r.players[1].id);
+  assert.deepEqual(r.wildInvestors, {});
+  assert.ok(a.investors.includes(letter));
+  assert.ok(!b.investors.includes(letter));
 });
-test("15 deals finish with conserved proceeds", () => {
-  const r = fixture();
-  let total = 0;
-  while (r.status === "playing") {
-    const value = r.deal!.value;
-    const ids = participants(r),
-      bossId = r.bossId;
-    act(r, bossId, { type: "OFFER", amounts: offer(r) });
-    for (const id of ids.filter((id) => id !== bossId))
-      act(r, id, { type: "ACCEPT" });
-    total += value;
+test("counter parity protects or transfers ownership", () => {
+  for (const n of [1, 2]) {
+    const r = fixture(),
+      a = r.players[0],
+      b = r.players[1],
+      letter = b.investors[0];
+    play(r, a.id, "REPLACE INVESTOR", b.id, letter);
+    for (let i = 0; i < n; i++) play(r, r.players[i].id, "COUNTER");
+    tick(r, r.stackDeadline! + 1);
+    assert.equal(a.investors.includes(letter), n === 2);
+    assert.equal(b.investors.includes(letter), n === 1);
   }
-  assert.equal(r.status, "finished");
-  assert.equal(
-    r.players.reduce((s, p) => s + p.money, 0),
-    total,
-  );
+});
+test("selection clears offer and block excludes investor until next deal", () => {
+  const r = fixture();
+  select(r);
+  act(r, r.bossId, {
+    type: "OFFER",
+    amounts: Object.fromEntries(
+      participants(r).map((id, i) => [id, i ? 0 : r.deal!.value]),
+    ),
+  });
+  assert.ok(r.offer);
+  select(r);
+  assert.equal(r.offer, undefined);
+  const target = r.players[1];
+  play(r, r.bossId, "BLOCK", target.id);
+  tick(r, r.stackDeadline! + 1);
+  assert.ok(!eligible(r, target.id, target.investors[0]));
+  assert.deepEqual(r.assignments, {});
+  tick(r, r.turnStartedAt + r.turnDuration + 1);
+  assert.ok(eligible(r, target.id, target.investors[0]));
+});
+test("full games pay exactly once with conserved money", () => {
+  for (const n of [3, 6, 9, 12]) {
+    const r = fixture(n);
+    let total = 0;
+    while (r.status === "playing") {
+      select(r);
+      const ids = participants(r),
+        value = r.deal!.value,
+        boss = r.bossId;
+      assert.throws(() =>
+        act(r, boss, { type: "OFFER", amounts: { [boss]: -1 } }),
+      );
+      act(r, boss, {
+        type: "OFFER",
+        amounts: Object.fromEntries(ids.map((id, i) => [id, i ? 0 : value])),
+      });
+      for (const id of ids.filter((id) => id !== boss))
+        act(r, id, { type: "ACCEPT" });
+      total += value;
+      assert.throws(() => act(r, boss, { type: "ACCEPT" }));
+    }
+    assert.equal(
+      r.players.reduce((s, p) => s + p.money, 0),
+      total,
+    );
+    assert.equal(r.round, r.totalDeals + 1);
+  }
 });

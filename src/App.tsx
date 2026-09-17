@@ -32,7 +32,13 @@ import {
 } from "lucide-react";
 import { socket } from "./services/socket";
 import type { Action, ActionCard, GameRoom, Reply } from "../shared/types";
-import { CARD_INFO, CARD_NAMES } from "../shared/constants";
+import {
+  CARD_INFO,
+  CARD_NAMES,
+  CARD_ART,
+  INVESTORS,
+  totalDealsFor,
+} from "../shared/constants";
 import "./index.css";
 import "./thai-theme.css";
 const money = (n: number) =>
@@ -78,6 +84,7 @@ function App() {
     [records, setRecords] = useState<any[]>([]),
     [dataLoading, setDataLoading] = useState(false);
   const notify = (s: string) => setNotice(s);
+  const roomSnapshot = useRef<GameRoom | undefined>(undefined);
   const previousSound = useRef({ round: 0, stack: 0, money: 0, status: "" });
   useEffect(() => {
     if (!modal) return;
@@ -115,7 +122,20 @@ function App() {
     };
   }, [modal]);
   useEffect(() => {
-    const onState = (r: GameRoom) => setRoom(r);
+    const onState = (r: GameRoom) => {
+      const previous = roomSnapshot.current;
+      if (
+        previous &&
+        (previous.round !== r.round ||
+          previous.bossId !== r.bossId ||
+          JSON.stringify(previous.assignments) !==
+            JSON.stringify(r.assignments) ||
+          r.stack.length > 0)
+      )
+        setModal((current) => (current === "offer" ? "" : current));
+      roomSnapshot.current = r;
+      setRoom(r);
+    };
     const onConnect = () => {
       setเชื่อมต่อแล้ว(true);
       const token = localStorage.getItem("gamePlayerToken"),
@@ -270,30 +290,53 @@ function App() {
         ...new Set(
           [
             room.bossId,
-            ...(room.deal?.requiredInvestors ?? []).map(
-              (i) =>
-                room.replacements[i] ??
-                room.players.find((p) => p.investors.includes(i))?.id,
-            ),
+            ...Object.values(room.assignments),
             ...room.extras,
-          ].filter((id): id is string => !!id && !room.blocked.includes(id)),
+          ].filter((id) => !!id && !room.blocked.includes(id)),
         ),
       ]
     : [];
-  const openOffer = () => {
-    if (!room?.deal) return;
-    const share = Math.floor(room.deal.value / participants.length);
-    setAmounts(
-      Object.fromEntries(
-        participants.map((id, i) => [
-          id,
-          share +
-            (i === 0 ? room.deal!.value - share * participants.length : 0),
-        ]),
-      ),
+  const eligibleFor = (pid: string, i: string) =>
+    !!room &&
+    !room.blocked.includes(pid) &&
+    (room.players.find((p) => p.id === pid)?.investors.includes(i) ||
+      (room.wildInvestors[pid] ?? []).includes(i));
+  const selectionComplete =
+    !!room?.deal &&
+    room.deal.requiredInvestors.every((i) =>
+      eligibleFor(room.assignments[i], i),
     );
+  const allocated = participants.reduce(
+    (sum, id) => sum + (amounts[id] ?? 0),
+    0,
+  );
+  const remaining = (room?.deal?.value ?? 0) - allocated;
+  const openOffer = () => {
+    if (!selectionComplete) {
+      notify("เลือกผู้ร่วมดีลให้ครบก่อน");
+      return;
+    }
+    setAmounts(Object.fromEntries(participants.map((id) => [id, 0])));
     setModal("offer");
   };
+  const adjustMoney = (id: string, direction: number) =>
+    setAmounts((previous) => {
+      const current = previous[id] ?? 0;
+      const next =
+        direction > 0
+          ? current === 0
+            ? 1000000
+            : current + 500000
+          : current <= 1000000
+            ? 0
+            : current - 500000;
+      const others = participants
+        .filter((p) => p !== id)
+        .reduce((sum, p) => sum + (previous[p] ?? 0), 0);
+      return next >= 0 && others + next <= (room?.deal?.value ?? 0)
+        ? { ...previous, [id]: next }
+        : previous;
+    });
   const copy = () =>
     navigator.clipboard
       .writeText(`${location.origin}/game/${room?.code}`)
@@ -440,7 +483,7 @@ function App() {
                     <em>นักเจรจา</em>
                   </h2>
                   <p>
-                    หกที่นั่ง โอกาสไม่รู้จบ เกมแห่งธุรกิจ
+                    สิบสองที่นั่ง โอกาสไม่รู้จบ เกมแห่งธุรกิจ
                     <br className="desktop-break" /> พันธมิตร
                     และคำสัญญาที่อาจเปลี่ยนไป
                   </p>
@@ -463,7 +506,7 @@ function App() {
                   <div className="hero-meta">
                     <span>
                       <Users size={15} />
-                      ผู้เล่น 3–6 คน
+                      ผู้เล่น 3–12 คน
                     </span>
                     <i />
                     <span>
@@ -649,7 +692,7 @@ function App() {
                   <section className="panel lobby-players">
                     <div className="panel-title">
                       <h2>ผู้เล่นในห้อง</h2>
-                      <span>{room.players.length} / 6 คน</span>
+                      <span>{room.players.length} / 12 คน</span>
                     </div>
                     {room.players.map((p) => (
                       <div className="lobby-player" key={p.id}>
@@ -677,22 +720,29 @@ function App() {
                         </span>
                       </div>
                     ))}
-                    {Array.from({ length: 6 - room.players.length }, (_, i) => (
-                      <button key={i} className="empty-seat" onClick={copy}>
-                        <Plus size={19} />
-                        ยังมีที่ว่าง รอเพื่อนมาเข้าร่วม
-                        <Link2 size={16} />
-                      </button>
-                    ))}
+                    {Array.from(
+                      { length: 12 - room.players.length },
+                      (_, i) => (
+                        <button key={i} className="empty-seat" onClick={copy}>
+                          <Plus size={19} />
+                          ยังมีที่ว่าง รอเพื่อนมาเข้าร่วม
+                          <Link2 size={16} />
+                        </button>
+                      ),
+                    )}
                   </section>
                   <section className="panel lobby-settings">
                     <Crown size={35} />
                     <h2>คำเชิญสำหรับคนพิเศษ</h2>
                     <p>
-                      ส่งรหัสห้องให้เพื่อน 2–5 คน
+                      ส่งรหัสห้องให้เพื่อน 2–11 คน
                       ทุกคนต้องกดพร้อมก่อนเริ่มดีลแรก
                     </p>
                     <div className="room-code">{room.code}</div>
+                    <p>
+                      เกมนี้มี {totalDealsFor(room.players.length)} ดีล ·
+                      สุ่มผู้เริ่มและนักลงทุนเมื่อเริ่มเกม
+                    </p>
                     <button className="gold-button full" onClick={copy}>
                       <Copy size={16} />
                       คัดลอกลิงก์เชิญ
@@ -774,7 +824,8 @@ function App() {
                   <div className="game-top">
                     <span>
                       <Layers3 size={17} /> ดีล{" "}
-                      <b>{String(room.round).padStart(2, "0")}</b> / 15
+                      <b>{String(room.round).padStart(2, "0")}</b> /{" "}
+                      {room.totalDeals}
                     </span>
                     <span>
                       <Crown size={17} /> ผู้นำดีล <b>{boss?.name}</b>
@@ -803,7 +854,7 @@ function App() {
                   <div className="game-layout">
                     <div className="players-column">
                       <div className="eyebrow">นักเจรจา</div>
-                      {room.players.map((p) => (
+                      {room.players.map((p, turnIndex) => (
                         <motion.div
                           layout
                           className={`player-panel ${p.id === room.bossId ? "leader" : ""}`}
@@ -812,7 +863,12 @@ function App() {
                           <div className="player-top">
                             <img src={portraits[p.avatar % 4]} alt="" />
                             <div>
-                              <strong>{p.name}</strong>
+                              <strong>
+                                <span className="turn-number">
+                                  {turnIndex + 1}
+                                </span>{" "}
+                                {p.name}
+                              </strong>
                               <small>
                                 {p.id === myId
                                   ? "คุณ"
@@ -833,13 +889,22 @@ function App() {
                             </span>
                           </div>
                           <div className="investor-row">
-                            {p.investors.map((i) => (
+                            {p.investors.map((i, investorIndex) => (
                               <span
-                                key={i}
-                                className="investor-chip"
+                                key={`${i}-${investorIndex}`}
+                                className={`investor-chip investor-${i}`}
                                 title={investorNames[i.charCodeAt(0) - 65]}
                               >
                                 {i}
+                              </span>
+                            ))}
+                            {(room.wildInvestors[p.id] ?? []).map((i) => (
+                              <span
+                                key={"wild-" + i}
+                                className={`investor-chip investor-${i} wild-chip`}
+                                title="ชั่วคราวจนจบดีล"
+                              >
+                                {i}★
                               </span>
                             ))}
                             <small>
@@ -864,7 +929,7 @@ function App() {
                       >
                         <div className="deal-image">
                           <img
-                            src="https://images.unsplash.com/photo-1511818966892-d7d671e672a2?auto=format&fit=crop&w=1000&q=85"
+                            src={`/art/${room.deal?.artwork}.png`}
                             alt="สถาปัตยกรรมร่วมสมัยของโครงการ"
                           />
                           <span className="small-tag">{room.deal?.sector}</span>
@@ -885,7 +950,7 @@ function App() {
                               {room.deal?.requiredInvestors.map((i) => (
                                 <span
                                   title={investorNames[i.charCodeAt(0) - 65]}
-                                  className="investor-chip"
+                                  className={`investor-chip investor-${i}`}
                                   key={i}
                                 >
                                   {i}
@@ -893,6 +958,52 @@ function App() {
                               ))}
                             </div>
                             <small>{room.deal?.difficulty}</small>
+                          </div>
+                          <div className="investor-selection">
+                            <h3>เลือกผู้ร่วมดีล</h3>
+                            <p>
+                              เลือกเจ้าของนักลงทุนแต่ละตัว
+                              ผู้เล่นคนเดียวเติมได้หลายช่อง
+                            </p>
+                            {room.deal?.requiredInvestors.map((i) => (
+                              <label key={i}>
+                                <span className={`investor-chip investor-${i}`}>
+                                  {i}
+                                </span>
+                                <select
+                                  aria-label={"ผู้ร่วมดีลนักลงทุน " + i}
+                                  disabled={!isBoss || room.stack.length > 0}
+                                  value={room.assignments[i] ?? ""}
+                                  onChange={(e) => {
+                                    const assignments = { ...room.assignments };
+                                    if (e.target.value)
+                                      assignments[i] = e.target.value;
+                                    else delete assignments[i];
+                                    action({
+                                      type: "SELECT_INVESTORS",
+                                      assignments,
+                                    });
+                                  }}
+                                >
+                                  <option value="">เลือกผู้เล่น</option>
+                                  {room.players
+                                    .filter((p) => eligibleFor(p.id, i))
+                                    .map((p) => (
+                                      <option key={p.id} value={p.id}>
+                                        {p.name}
+                                        {p.investors.includes(i)
+                                          ? ""
+                                          : " · " + i + "★"}
+                                      </option>
+                                    ))}
+                                </select>
+                              </label>
+                            ))}
+                            <small>
+                              {selectionComplete
+                                ? "เลือกครบแล้ว พร้อมแบ่งเงิน"
+                                : "ต้องเลือกให้ครบทุกตัวอักษร"}
+                            </small>
                           </div>
                           {room.stack.length > 0 ? (
                             <div className="stack-banner">
@@ -964,6 +1075,7 @@ function App() {
                               {isBoss && (
                                 <button
                                   className="gold-button full"
+                                  disabled={!selectionComplete}
                                   onClick={openOffer}
                                 >
                                   <Handshake size={18} />
@@ -1109,7 +1221,12 @@ function App() {
                             setTarget(
                               room.players.find((p) => p.id !== myId)?.id || "",
                             );
-                            setInvestor(room.deal!.requiredInvestors[0]);
+                            setInvestor(
+                              c.type === "REPLACE INVESTOR"
+                                ? (room.players.find((p) => p.id !== myId)
+                                    ?.investors[0] ?? "A")
+                                : "A",
+                            );
                             setModal("play");
                           }}
                         >
@@ -1119,6 +1236,11 @@ function App() {
                               {c.type === "COUNTER" ? "โต้กลับ" : "อิทธิพล"}
                             </span>
                           </div>
+                          <img
+                            className="card-art"
+                            src={`/art/${CARD_ART[c.type]}.png`}
+                            alt={CARD_NAMES[c.type]}
+                          />
                           <h3>{CARD_NAMES[c.type]}</h3>
                           <p>{c.description}</p>
                           <span className="play-label">
@@ -1146,12 +1268,12 @@ function App() {
                   [
                     "01",
                     "เข้าร่วมโต๊ะเจรจา",
-                    "สร้างห้องสำหรับ 3–6 คน แชร์รหัสห้องแล้วกดพร้อม ผู้เล่นแต่ละคนจะได้รับนักลงทุนและการ์ดพิเศษ 4 ใบ",
+                    "สร้างห้องสำหรับ 3–12 คน แชร์รหัสห้องแล้วกดพร้อม สุ่มลำดับและนักลงทุน A–F ให้ทุกคน คนเกิน 6 จะมีตัวอักษรซ้ำได้ แต่ละคนได้รับการ์ดพิเศษ 4 ใบ",
                   ],
                   [
                     "02",
                     "มองหาโอกาส",
-                    "ผู้นำเปลี่ยนทุกดีล แต่ละโครงการต้องใช้นักลงทุนที่กำหนด ผู้ถือครองนักลงทุนเหล่านั้นและผู้นำต้องเจรจาแบ่งผลประโยชน์ร่วมกัน",
+                    "ผู้นำเปลี่ยนทุกดีล แต่ละโครงการต้องใช้นักลงทุนที่กำหนด ผู้นำเลือกเจ้าของนักลงทุนทีละช่อง ถ้ามีตัวซ้ำให้เลือกคนใดคนหนึ่ง แล้วร่วมกันเจรจาแบ่งผลประโยชน์",
                   ],
                   [
                     "03",
@@ -1171,7 +1293,7 @@ function App() {
                   [
                     "06",
                     "สะสมความมั่งคั่ง",
-                    "ครบ 15 ดีล ผู้มีเงินมากที่สุดชนะ เงินเท่ากันถือว่าเสมอ คู่แข่งจำลองในโหมดฝึกจะยอมรับข้อเสนอที่ถูกกติกาอัตโนมัติ",
+                    "เล่นครบ 15 / 20 / 25 ดีล ตามจำนวนผู้เล่น ผู้มีเงินมากที่สุดชนะ เงินเท่ากันถือว่าเสมอ คู่แข่งจำลองในโหมดฝึกจะยอมรับข้อเสนอที่ถูกกติกาอัตโนมัติ",
                   ],
                 ].map(([n, h, p]) => (
                   <section className="panel rule" key={n}>
@@ -1302,7 +1424,7 @@ function App() {
                       ? "กรอกชื่อของคุณและรหัสห้องที่ได้รับจากเจ้าของห้อง"
                       : modal === "practice"
                         ? "ฝึกเล่นเกมเต็มกับคู่แข่งจำลอง 3 คน ซึ่งจะรับข้อเสนอที่ถูกกติกาและผลัดกันเป็นผู้นำ"
-                        : "สร้างห้องส่วนตัว แล้วชวนเพื่อน 2–5 คนมาเล่นด้วยกัน"}
+                        : "สร้างห้องส่วนตัว แล้วชวนเพื่อน 2–11 คนมาเล่นด้วยกัน"}
                   </p>
                   <form
                     onSubmit={(e) => {
@@ -1365,33 +1487,72 @@ function App() {
                     ผู้ร่วมดีลทุกคนต้องยอมรับข้อเสนอ
                   </p>
                   {participants.map((id) => (
-                    <label className="allocation" key={id}>
+                    <div className="allocation allocation-buttons" key={id}>
                       <span>
                         {room?.players.find((p) => p.id === id)?.name}
                       </span>
-                      <div>
-                        <input
-                          aria-label={`ส่วนแบ่งของ ${room?.players.find((p) => p.id === id)?.name}`}
-                          type="number"
-                          min="0"
-                          step="1"
-                          value={amounts[id] ?? 0}
-                          onChange={(e) =>
-                            setAmounts({
-                              ...amounts,
-                              [id]: Number(e.target.value),
-                            })
+                      <div className="money-controls">
+                        <button
+                          aria-label={
+                            "ลดส่วนแบ่ง " +
+                            room?.players.find((p) => p.id === id)?.name
                           }
-                        />
-                        <span>บาท</span>
+                          disabled={!(amounts[id] > 0)}
+                          onClick={() => adjustMoney(id, -1)}
+                        >
+                          −
+                        </button>
+                        <output aria-live="polite">
+                          {money(amounts[id] ?? 0)}
+                        </output>
+                        <button
+                          aria-label={
+                            "เพิ่มส่วนแบ่ง " +
+                            room?.players.find((p) => p.id === id)?.name
+                          }
+                          disabled={
+                            remaining <
+                            ((amounts[id] ?? 0) === 0 ? 1000000 : 500000)
+                          }
+                          onClick={() => adjustMoney(id, 1)}
+                        >
+                          +
+                        </button>
                       </div>
-                    </label>
+                      <button
+                        className="text-button remainder-button"
+                        disabled={
+                          remaining <= 0 ||
+                          (amounts[id] ?? 0) + remaining < 1000000
+                        }
+                        onClick={() =>
+                          setAmounts({
+                            ...amounts,
+                            [id]: (amounts[id] ?? 0) + remaining,
+                          })
+                        }
+                      >
+                        ให้เงินที่เหลือ
+                      </button>
+                    </div>
                   ))}
+                  <div className="remaining-money">
+                    คงเหลือ <strong>{money(remaining)}</strong>
+                  </div>
+                  <button
+                    className="outline-button full"
+                    onClick={() =>
+                      setAmounts(
+                        Object.fromEntries(participants.map((id) => [id, 0])),
+                      )
+                    }
+                  >
+                    ล้างส่วนแบ่ง
+                  </button>
                   <div className="allocation-total">
                     แบ่งแล้ว{" "}
                     <strong>
-                      {money(Object.values(amounts).reduce((a, b) => a + b, 0))}{" "}
-                      / {money(room!.deal!.value)}
+                      {money(allocated)} / {money(room!.deal!.value)}
                     </strong>
                   </div>
                   <button
@@ -1400,7 +1561,14 @@ function App() {
                       Object.values(amounts).reduce((a, b) => a + b, 0) !==
                       room!.deal!.value
                     }
-                    onClick={() => action({ type: "OFFER", amounts })}
+                    onClick={() =>
+                      action({
+                        type: "OFFER",
+                        amounts: Object.fromEntries(
+                          participants.map((id) => [id, amounts[id] ?? 0]),
+                        ),
+                      })
+                    }
                   >
                     ส่งข้อเสนอ <Send size={17} />
                   </button>
@@ -1415,12 +1583,20 @@ function App() {
                     {selected?.description} การใช้การ์ดนี้จะล้างข้อเสนอปัจจุบัน
                     และเปิดให้โต้กลับได้ 5 วินาที
                   </p>
-                  {selected?.type === "BLOCK" && (
+                  {["BLOCK", "REPLACE INVESTOR"].includes(
+                    selected?.type ?? "",
+                  ) && (
                     <label>
                       เลือกคู่แข่ง
                       <select
                         value={target}
-                        onChange={(e) => setTarget(e.target.value)}
+                        onChange={(e) => {
+                          setTarget(e.target.value);
+                          setInvestor(
+                            room?.players.find((p) => p.id === e.target.value)
+                              ?.investors[0] ?? "A",
+                          );
+                        }}
                       >
                         {room?.players
                           .filter((p) => p.id !== myId)
@@ -1441,7 +1617,15 @@ function App() {
                         value={investor}
                         onChange={(e) => setInvestor(e.target.value)}
                       >
-                        {room?.deal?.requiredInvestors.map((i) => (
+                        {(selected?.type === "REPLACE INVESTOR"
+                          ? [
+                              ...new Set(
+                                room?.players.find((p) => p.id === target)
+                                  ?.investors ?? [],
+                              ),
+                            ]
+                          : INVESTORS
+                        ).map((i) => (
                           <option key={i}>{i}</option>
                         ))}
                       </select>
@@ -1473,15 +1657,20 @@ function App() {
                     {Object.entries(CARD_INFO).map(([t, d]) => (
                       <div className="action-card" key={t}>
                         <Diamond size={23} />
+                        <img
+                          className="card-art"
+                          src={`/art/${CARD_ART[t as keyof typeof CARD_ART]}.png`}
+                          alt={CARD_NAMES[t as keyof typeof CARD_NAMES]}
+                        />
                         <h3>{CARD_NAMES[t as keyof typeof CARD_NAMES]}</h3>
                         <p>{d}</p>
                         <small>
                           {t === "BLOCK"
-                            ? "คุณจะเป็นตัวแทนนักลงทุนที่จำเป็นของคู่แข่งที่ถูกบล็อก"
+                            ? "คู่แข่งถูกกันออกจากดีล ผู้นำต้องเลือกผู้ร่วมดีลใหม่"
                             : t === "COUNTER"
                               ? "การ์ดโต้กลับมีผลย้อนลำดับ จากใบล่าสุดไปใบแรก"
                               : t === "REPLACE INVESTOR"
-                                ? "เลือกนักลงทุนที่ต้องใช้ 1 ประเภท มีผลเฉพาะดีลนี้"
+                                ? "ยึดนักลงทุนจริงจากคู่แข่ง ไม่คืนเมื่อจบดีล และถูกยึดต่อได้"
                                 : "มีผลเฉพาะดีลที่กำลังเล่น"}
                         </small>
                       </div>

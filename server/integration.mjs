@@ -1,9 +1,11 @@
 import { io } from "socket.io-client";
 import assert from "node:assert/strict";
-const sockets = [];
+const sockets = [],
+  byId = new Map();
+let snapshot;
 const connect = () =>
   new Promise((resolve, reject) => {
-    const s = io("http://localhost:3001", {
+    const s = io(process.env.TEST_SERVER_URL ?? "http://localhost:3001", {
       transports: ["websocket"],
       forceNew: true,
     });
@@ -17,61 +19,97 @@ const call = (s, event, data) =>
       .timeout(3000)
       .emit(event, data, (err, r) => (err ? reject(err) : resolve(r))),
   );
+const action = async (id, data) => {
+  const r = await call(byId.get(id), "player:action", data);
+  assert.equal(r.error, undefined);
+  return r;
+};
 try {
-  const a = await connect(),
-    b = await connect(),
-    c = await connect();
-  const created = await call(a, "room:create", { name: "Test Host" });
+  const host = await connect();
+  host.on("game:state", (r) => (snapshot = r));
+  const created = await call(host, "room:create", { name: "Host" });
   assert.ok(created.token);
-  const code = created.room.code;
-  const joinedB = await call(b, "room:join", { code, name: "Test Second" }),
-    joinedC = await call(c, "room:join", { code, name: "Test Third" });
-  assert.ok(joinedB.playerId && joinedC.playerId);
-  assert.ok((await call(b, "player:action", { type: "START" })).error);
-  await call(b, "player:action", { type: "READY" });
-  await call(c, "player:action", { type: "READY" });
-  let snapshot;
-  a.on("game:state", (r) => (snapshot = r));
-  assert.equal(
-    (await call(a, "player:action", { type: "START" })).error,
-    undefined,
-  );
-  assert.equal(snapshot.status, "playing");
-  assert.equal(snapshot.players[1].cards.length, 0);
-  assert.equal(snapshot.players[0].cards.length, 4);
-  const ids = snapshot.players.map((p) => p.id);
-  const amounts = Object.fromEntries(ids.map((id) => [id, 4000000]));
-  assert.ok((await call(b, "player:action", { type: "OFFER", amounts })).error);
-  await call(a, "player:action", { type: "OFFER", amounts });
-  await call(b, "player:action", { type: "ACCEPT" });
-  await call(c, "player:action", { type: "ACCEPT" });
-  assert.equal(snapshot.round, 2);
-  assert.equal(
-    snapshot.players.reduce((s, p) => s + p.money, 0),
-    12000000,
-  );
-  await call(b, "player:action", {
-    type: "CHAT",
-    text: "A real multiplayer deal.",
-  });
-  assert.equal(snapshot.chat.at(-1).text, "A real multiplayer deal.");
-  const before = snapshot;
-  a.disconnect();
-  const restoredSocket = await connect();
-  const restore = await call(restoredSocket, "player:reconnect", {
-    code,
-    token: created.token,
-  });
-  assert.equal(restore.room.round, before.round);
-  assert.equal(restore.room.players[0].money, 4000000);
-  assert.equal(restore.room.players[0].cards.length, 5);
-  const stranger = await connect();
+  byId.set(created.playerId, host);
+  for (let i = 1; i < 12; i++) {
+    const s = await connect(),
+      r = await call(s, "room:join", {
+        code: created.room.code,
+        name: "Player " + i,
+      });
+    assert.ok(r.playerId);
+    byId.set(r.playerId, s);
+    await action(r.playerId, { type: "READY" });
+  }
+  const extra = await connect();
   assert.ok(
-    (await call(stranger, "player:reconnect", { code, token: "invalid" }))
-      .error,
+    (
+      await call(extra, "room:join", {
+        code: created.room.code,
+        name: "Thirteenth",
+      })
+    ).error,
+  );
+  await action(created.playerId, { type: "START" });
+  assert.equal(snapshot.players.length, 12);
+  assert.equal(snapshot.totalDeals, 25);
+  assert.equal(
+    snapshot.players.find((p) => p.id === created.playerId).cards.length,
+    4,
+  );
+  assert.ok(
+    snapshot.players
+      .filter((p) => p.id !== created.playerId)
+      .every((p) => p.cards.length === 0),
+  );
+  assert.deepEqual(snapshot.deck, []);
+  let total = 0;
+  while (snapshot.status === "playing") {
+    const r = snapshot,
+      boss = r.bossId;
+    const assignments = Object.fromEntries(
+      r.deal.requiredInvestors.map((i) => [
+        i,
+        r.players.find((p) => p.investors.includes(i)).id,
+      ]),
+    );
+    await action(boss, { type: "SELECT_INVESTORS", assignments });
+    const ids = [...new Set([boss, ...Object.values(assignments)])],
+      value = r.deal.value;
+    await action(boss, {
+      type: "OFFER",
+      amounts: Object.fromEntries(ids.map((id, i) => [id, i ? 0 : value])),
+    });
+    for (const id of ids.filter((id) => id !== boss))
+      await action(id, { type: "ACCEPT" });
+    total += value;
+  }
+  assert.equal(
+    snapshot.players.reduce((n, p) => n + p.money, 0),
+    total,
+  );
+  const before = snapshot;
+  host.disconnect();
+  const restored = await connect(),
+    r = await call(restored, "player:reconnect", {
+      code: created.room.code,
+      token: created.token,
+    });
+  assert.equal(r.error, undefined);
+  assert.equal(r.room.status, "finished");
+  assert.equal(
+    r.room.players.find((p) => p.id === created.playerId).money,
+    before.players.find((p) => p.id === created.playerId).money,
+  );
+  assert.ok(
+    (
+      await call(extra, "player:reconnect", {
+        code: created.room.code,
+        token: "invalid",
+      })
+    ).error,
   );
   console.log(
-    "PASS: three real sockets, lobby, permissions, private hands, offers, payout, chat, reconnect and invalid token.",
+    "PASS: 12 real sockets, capacity, private hands, random leader, selected participants, 25 deals, conserved payout, reconnect.",
   );
 } finally {
   sockets.forEach((s) => s.disconnect());

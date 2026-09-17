@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomUUID, randomInt } from "node:crypto";
 import type {
   Action,
   ActionCard,
@@ -11,10 +11,20 @@ import {
   CARD_NAMES,
   DEALS,
   INVESTORS,
+  MAX_PLAYERS,
+  totalDealsFor,
 } from "../../../shared/constants";
+export function shuffle<T>(items: T[]): T[] {
+  const a = [...items];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = randomInt(i + 1);
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
 export function card(type?: CardType): ActionCard {
-  const keys = Object.keys(CARD_INFO) as CardType[];
-  const t = type ?? keys[Math.floor(Math.random() * keys.length)];
+  const types = Object.keys(CARD_INFO) as CardType[];
+  const t = type ?? types[randomInt(types.length)];
   return {
     id: randomUUID(),
     type: t,
@@ -49,31 +59,50 @@ export function newRoom(code: string, p: Player): GameRoom {
     round: 0,
     currentPlayerIndex: 0,
     bossId: p.id,
-    turnStartedAt: 0,
+    turnStartedAt: Date.now(),
     turnDuration: 90000,
     stack: [],
     blocked: [],
-    replacements: {},
+    assignments: {},
+    wildInvestors: {},
+    deck: [],
+    totalDeals: 15,
     extras: [],
     chat: [],
     log: [],
     matchId: randomUUID(),
   };
 }
+export function eligible(r: GameRoom, id: string, investor: string) {
+  const p = r.players.find((p) => p.id === id);
+  return (
+    !!p &&
+    !r.blocked.includes(id) &&
+    (p.investors.includes(investor) ||
+      (r.wildInvestors[id] ?? []).includes(investor))
+  );
+}
+export function completeSelection(r: GameRoom) {
+  return (
+    !!r.deal &&
+    r.deal.requiredInvestors.every((i) => eligible(r, r.assignments[i], i))
+  );
+}
 export function participants(r: GameRoom) {
   return [
     ...new Set(
-      [
-        r.bossId,
-        ...(r.deal?.requiredInvestors ?? []).map(
-          (i) =>
-            r.replacements[i] ??
-            r.players.find((p) => p.investors.includes(i))?.id,
-        ),
-        ...r.extras,
-      ].filter((id): id is string => !!id && !r.blocked.includes(id)),
+      [r.bossId, ...Object.values(r.assignments), ...r.extras].filter(
+        (id) => !!id && !r.blocked.includes(id),
+      ),
     ),
   ];
+}
+function invalidate(r: GameRoom, clearSelection = false) {
+  r.offer = undefined;
+  if (clearSelection) r.assignments = {};
+  else
+    for (const [i, id] of Object.entries(r.assignments))
+      if (!eligible(r, id, i)) delete r.assignments[i];
 }
 export function next(r: GameRoom, success = false) {
   if (r.deal)
@@ -88,16 +117,17 @@ export function next(r: GameRoom, success = false) {
   r.stack = [];
   r.stackDeadline = undefined;
   r.blocked = [];
-  r.replacements = {};
+  r.assignments = {};
+  r.wildInvestors = {};
   r.extras = [];
-  if (r.round > 15) {
+  if (r.round > r.totalDeals) {
     r.status = "finished";
     log(r, "จบเกมแล้ว มาดูอันดับนักเจรจากัน");
     return;
   }
   r.currentPlayerIndex = (r.round - 1) % r.players.length;
   r.bossId = r.players[r.currentPlayerIndex].id;
-  r.deal = { ...DEALS[r.round - 1] };
+  r.deal = { ...r.deck[r.round - 1] };
   r.turnStartedAt = Date.now();
   if (r.round > 1)
     r.players.forEach((p) => {
@@ -106,25 +136,46 @@ export function next(r: GameRoom, success = false) {
   log(r, `${r.players[r.currentPlayerIndex].name} นำการเจรจา ${r.deal.name}`);
 }
 export function start(r: GameRoom) {
+  if (r.players.length < 3 || r.players.length > MAX_PLAYERS)
+    throw Error("ต้องมีผู้เล่น 3–12 คน");
   r.status = "playing";
   r.round = 0;
+  r.deal = undefined;
   r.matchId = randomUUID();
-  r.players.forEach((p, i) => {
+  r.totalDeals = totalDealsFor(r.players.length);
+  r.players = shuffle(r.players);
+  const letters = shuffle(INVESTORS);
+  const tokens = shuffle(
+    r.players.length <= 6
+      ? letters
+      : [...letters, ...shuffle(INVESTORS).slice(0, r.players.length - 6)],
+  );
+  r.players.forEach((p) => {
     p.money = 0;
-    p.investors = INVESTORS.filter((_, n) => n % r.players.length === i);
+    p.investors = [];
     p.cards = [
       card("TAKE CONTROL"),
-      card("BLOCK"),
+      card("REPLACE INVESTOR"),
       card("COUNTER"),
       card("WILD INVESTOR"),
     ];
   });
+  tokens.forEach((i, n) => r.players[n % r.players.length].investors.push(i));
+  const pool =
+    r.players.length <= 6
+      ? DEALS.slice(0, 20)
+      : r.players.length <= 9
+        ? DEALS.slice(5)
+        : DEALS;
+  r.deck = shuffle(pool).slice(0, r.totalDeals);
+  log(r, "สุ่มนักลงทุนและลำดับผู้เล่นใหม่แล้ว");
   next(r);
 }
 function settle(r: GameRoom) {
   if (
     r.offer &&
     !r.stack.length &&
+    completeSelection(r) &&
     participants(r).every((id) => r.offer!.accepted.includes(id))
   ) {
     for (const p of r.players) p.money += r.offer.amounts[p.id] ?? 0;
@@ -133,10 +184,10 @@ function settle(r: GameRoom) {
 }
 export function act(r: GameRoom, id: string, a: Action) {
   const p = r.players.find((x) => x.id === id);
-  if (!p) throw new Error("คุณไม่ได้อยู่ในห้องนี้");
+  if (!p) throw Error("คุณไม่ได้อยู่ในห้องนี้");
   if (a.type === "CHAT") {
     if (typeof a.text !== "string" || !a.text.trim() || a.text.length > 300)
-      throw new Error("ข้อความต้องมีความยาว 1–300 ตัวอักษร");
+      throw Error("ข้อความต้องมีความยาว 1–300 ตัวอักษร");
     r.chat.push({
       id: randomUUID(),
       playerId: id,
@@ -148,7 +199,7 @@ export function act(r: GameRoom, id: string, a: Action) {
     return;
   }
   if (a.type === "READY") {
-    if (r.status !== "lobby") throw new Error("เกมเริ่มไปแล้ว");
+    if (r.status !== "lobby") throw Error("เกมเริ่มไปแล้ว");
     p.ready = !p.ready;
     return;
   }
@@ -156,46 +207,52 @@ export function act(r: GameRoom, id: string, a: Action) {
     if (
       id !== r.hostId ||
       r.status !== "lobby" ||
-      r.players.length < 3 ||
       !r.players.every((x) => x.ready || x.id === id)
     )
-      throw new Error("เจ้าของห้องเริ่มเกมได้เมื่อมีผู้เล่นพร้อม 3–6 คน");
+      throw Error("เจ้าของห้องเริ่มได้เมื่อทุกคนพร้อม");
     start(r);
     return;
   }
   if (a.type === "AGAIN") {
     if (id !== r.hostId || r.status !== "finished")
-      throw new Error("เฉพาะเจ้าของห้องเท่านั้นที่เริ่มเล่นใหม่ได้");
+      throw Error("เฉพาะเจ้าของห้องเท่านั้นที่เริ่มใหม่ได้");
     r.status = "lobby";
     r.players.forEach((x) => (x.ready = !!x.bot));
     return;
   }
-  if (r.status !== "playing" || !r.deal)
-    throw new Error("ยังไม่มีดีลที่กำลังเล่น");
+  if (r.status !== "playing" || !r.deal) throw Error("ยังไม่มีดีลที่กำลังเล่น");
   if (a.type === "PASS") {
     if (id !== r.bossId || r.stack.length)
-      throw new Error("เฉพาะผู้นำที่กดผ่านได้ และต้องไม่มีการ์ดรอทำงาน");
+      throw Error("เฉพาะผู้นำกดผ่านได้เมื่อไม่มีการ์ดรอทำงาน");
     next(r);
     return;
   }
   if (a.type === "PLAY_CARD") {
     const c = p.cards.find((x) => x.id === a.cardId);
-    if (!c || r.blocked.includes(id))
-      throw new Error("ไม่สามารถใช้การ์ดใบนี้ได้");
+    if (!c || r.blocked.includes(id)) throw Error("ไม่สามารถใช้การ์ดใบนี้ได้");
     if (c.type === "COUNTER" && !r.stack.length)
-      throw new Error("ยังไม่มีการ์ดให้โต้กลับ");
+      throw Error("ยังไม่มีการ์ดให้โต้กลับ");
     if (c.type !== "COUNTER" && r.stack.length)
-      throw new Error("รอให้การ์ดทำงานเสร็จ หรือใช้การ์ดโต้กลับ");
+      throw Error("รอการ์ดทำงาน หรือใช้การ์ดโต้กลับ");
+    const target = r.players.find((x) => x.id === a.target);
     if (
       c.type === "BLOCK" &&
-      (!r.players.some((x) => x.id === a.target) || a.target === id)
+      (!target || target.id === id || r.blocked.includes(target.id))
     )
-      throw new Error("กรุณาเลือกผู้เล่นคนอื่น");
+      throw Error("กรุณาเลือกคู่แข่งที่ยังไม่ถูกบล็อก");
     if (
-      ["REPLACE INVESTOR", "WILD INVESTOR"].includes(c.type) &&
-      !r.deal.requiredInvestors.includes(a.investor ?? "")
+      c.type === "REPLACE INVESTOR" &&
+      (!target ||
+        target.id === id ||
+        !target.investors.includes(a.investor ?? ""))
     )
-      throw new Error("กรุณาเลือกนักลงทุนที่ดีลนี้ต้องใช้");
+      throw Error("เลือกนักลงทุนจริงของคู่แข่ง ไม่สามารถยึดตัวชั่วคราวได้");
+    if (
+      c.type === "WILD INVESTOR" &&
+      (!INVESTORS.includes(a.investor ?? "") ||
+        (r.wildInvestors[id] ?? []).includes(a.investor!))
+    )
+      throw Error("เลือก A–F ที่ยังไม่ได้เพิ่มชั่วคราว");
     p.cards = p.cards.filter((x) => x.id !== c.id);
     r.stack.push({
       id: randomUUID(),
@@ -205,32 +262,59 @@ export function act(r: GameRoom, id: string, a: Action) {
       investor: a.investor,
     });
     r.stackDeadline = Date.now() + 5000;
-    r.offer = undefined;
+    invalidate(r);
     log(r, `${p.name} ใช้การ์ด ${CARD_NAMES[c.type]}`);
     return;
   }
-  if (r.stack.length) throw new Error("กำลังประมวลผลการ์ด");
-  if (a.type === "OFFER") {
-    if (id !== r.bossId || !a.amounts || typeof a.amounts !== "object")
-      throw new Error("เฉพาะผู้นำดีลเท่านั้นที่เสนอส่วนแบ่งได้");
-    const ids = participants(r);
-    const entries = Object.entries(a.amounts);
+  if (r.stack.length) throw Error("กำลังประมวลผลการ์ด");
+  if (a.type === "SELECT_INVESTORS") {
+    if (id !== r.bossId) throw Error("เฉพาะผู้นำเลือกผู้ร่วมดีลได้");
     if (
+      !a.assignments ||
+      typeof a.assignments !== "object" ||
+      Array.isArray(a.assignments)
+    )
+      throw Error("รายชื่อผู้ร่วมดีลไม่ถูกต้อง");
+    const entries = Object.entries(a.assignments);
+    if (
+      entries.some(
+        ([i, pid]) =>
+          !r.deal!.requiredInvestors.includes(i) ||
+          typeof pid !== "string" ||
+          !eligible(r, pid, i),
+      )
+    )
+      throw Error("เลือกผู้เล่นที่มีนักลงทุนตรงกับดีลและไม่ถูกบล็อก");
+    r.assignments = { ...a.assignments };
+    invalidate(r);
+    log(r, `${p.name} เปลี่ยนผู้ร่วมดีล ต้องเสนอส่วนแบ่งใหม่`);
+    return;
+  }
+  if (a.type === "OFFER") {
+    if (id !== r.bossId) throw Error("เฉพาะผู้นำเสนอส่วนแบ่งได้");
+    if (!completeSelection(r))
+      throw Error("เลือกนักลงทุนให้ครบทุกช่องก่อนแบ่งเงิน");
+    if (!a.amounts || typeof a.amounts !== "object" || Array.isArray(a.amounts))
+      throw Error("ข้อเสนอไม่ถูกต้อง");
+    const ids = participants(r),
+      entries = Object.entries(a.amounts);
+    if (
+      entries.length !== ids.length ||
       entries.some(
         ([k, v]) => !ids.includes(k) || !Number.isSafeInteger(v) || v < 0,
       ) ||
       ids.some((k) => !Object.hasOwn(a.amounts, k)) ||
       entries.reduce((s, [, v]) => s + v, 0) !== r.deal.value
     )
-      throw new Error("กรุณาแบ่งเงินครบมูลค่าดีลให้ผู้เล่นที่เกี่ยวข้องทุกคน");
+      throw Error("กรุณาแบ่งเงินครบมูลค่าดีลให้ผู้ร่วมดีลทุกคน");
     r.offer = { amounts: { ...a.amounts }, accepted: [id], rejected: [] };
     log(r, `${p.name} เสนอส่วนแบ่งใหม่`);
     settle(r);
     return;
   }
   if (a.type === "ACCEPT" || a.type === "REJECT") {
-    if (!r.offer || !participants(r).includes(id))
-      throw new Error("ยังไม่มีข้อเสนอสำหรับคุณ");
+    if (!r.offer || !participants(r).includes(id) || !completeSelection(r))
+      throw Error("ยังไม่มีข้อเสนอสำหรับคุณ");
     r.offer.accepted = r.offer.accepted.filter((x) => x !== id);
     r.offer.rejected = r.offer.rejected.filter((x) => x !== id);
     r.offer[a.type === "ACCEPT" ? "accepted" : "rejected"].push(id);
@@ -238,11 +322,15 @@ export function act(r: GameRoom, id: string, a: Action) {
     settle(r);
     return;
   }
-  throw new Error("ไม่รู้จักคำสั่งนี้");
+  throw Error("ไม่รู้จักคำสั่งนี้");
 }
 export function tick(r: GameRoom, now = Date.now()) {
   if (r.status !== "playing") return false;
   let changed = false;
+  if (now >= r.turnStartedAt + r.turnDuration) {
+    next(r);
+    return true;
+  }
   if (r.stack.length && now >= (r.stackDeadline ?? 0)) {
     const base = r.stack[0];
     if (r.stack.length % 2 === 1) {
@@ -250,23 +338,38 @@ export function tick(r: GameRoom, now = Date.now()) {
       switch (base.card.type) {
         case "TAKE CONTROL":
           r.bossId = id;
+          invalidate(r, true);
           break;
         case "BLOCK":
           r.blocked.push(base.target!);
           if (r.bossId === base.target) r.bossId = id;
-          for (const i of r.deal!.requiredInvestors) {
-            const owner =
-              r.replacements[i] ??
-              r.players.find((p) => p.investors.includes(i))?.id;
-            if (owner === base.target) r.replacements[i] = id;
-          }
+          invalidate(r, true);
           break;
-        case "REPLACE INVESTOR":
+        case "REPLACE INVESTOR": {
+          const from = r.players.find((p) => p.id === base.target),
+            to = r.players.find((p) => p.id === id);
+          const index = from?.investors.indexOf(base.investor!) ?? -1;
+          if (from && to && index >= 0) {
+            from.investors.splice(index, 1);
+            to.investors.push(base.investor!);
+            log(
+              r,
+              `${to.name} ยึด ${base.investor} จาก ${from.name} จนกว่าจะถูกยึดต่อ`,
+            );
+          }
+          invalidate(r, true);
+          break;
+        }
         case "WILD INVESTOR":
-          r.replacements[base.investor!] = id;
+          r.wildInvestors[id] = [
+            ...(r.wildInvestors[id] ?? []),
+            base.investor!,
+          ];
+          invalidate(r);
           break;
         case "STEAL DEAL":
-          r.extras.push(id);
+          if (!r.extras.includes(id)) r.extras.push(id);
+          invalidate(r);
           break;
       }
       log(r, `${CARD_NAMES[base.card.type]} มีผลแล้ว`);
@@ -274,10 +377,6 @@ export function tick(r: GameRoom, now = Date.now()) {
     r.stack = [];
     r.stackDeadline = undefined;
     changed = true;
-  }
-  if (now >= r.turnStartedAt + r.turnDuration) {
-    next(r);
-    return true;
   }
   if (r.offer && !r.stack.length) {
     for (const p of r.players.filter((x) => x.bot)) {
@@ -295,9 +394,18 @@ export function tick(r: GameRoom, now = Date.now()) {
     !r.stack.length &&
     now - r.turnStartedAt > 3500
   ) {
+    if (!completeSelection(r)) {
+      const assignments: Record<string, string> = {};
+      for (const i of r.deal!.requiredInvestors) {
+        const candidates = r.players.filter((p) => eligible(r, p.id, i));
+        if (!candidates.length) return changed;
+        assignments[i] = candidates[randomInt(candidates.length)].id;
+      }
+      act(r, boss.id, { type: "SELECT_INVESTORS", assignments });
+    }
     const ids = participants(r),
       value = r.deal!.value,
-      share = Math.floor(value / ids.length);
+      share = Math.floor(value / ids.length / 500000) * 500000;
     const amounts = Object.fromEntries(
       ids.map((id, i) => [
         id,
@@ -312,6 +420,7 @@ export function tick(r: GameRoom, now = Date.now()) {
 export function view(r: GameRoom, id: string): GameRoom {
   return {
     ...r,
+    deck: [],
     players: r.players.map((p) => ({
       ...p,
       cards: p.id === id ? p.cards : [],
