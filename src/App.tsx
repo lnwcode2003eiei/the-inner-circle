@@ -1042,10 +1042,10 @@ function App() {
                                 {participants.includes(myId) && (
                                   <>
                                     <button
-                                      className="gold-button"
+                                      className="gold-button accept-offer-button"
                                       onClick={() => action({ type: "ACCEPT" })}
                                     >
-                                      ยอมรับ <Check size={15} />
+                                      ยอมรับ
                                     </button>
                                     <button
                                       className="outline-button"

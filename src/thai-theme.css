@@ -1500,3 +1500,31 @@ a:focus-visible {
     background: #f6efdf;
   }
 }
+
+/* An oak tabletop behind the parchment panels. */
+body {
+  background-color: #cbb18a;
+  background-image:
+    linear-gradient(#f3e5cb38, #f3e5cb38),
+    url("/art/medieval/wood-background.png");
+  background-size:
+    auto,
+    720px 720px;
+  background-repeat: repeat;
+}
+.offer-actions .accept-offer-button {
+  background: linear-gradient(120deg, #ead095, #c39a4a);
+  border: 1px solid #94702e;
+  color: #39270f;
+  box-shadow:
+    inset 0 1px 0 #fff3c6,
+    0 3px 10px #62451d24;
+  font-weight: 700;
+}
+.offer-actions .accept-offer-button:hover {
+  background: linear-gradient(120deg, #f1dba7, #cfaa5a);
+  color: #2f210e;
+  box-shadow:
+    inset 0 1px 0 #fff3c6,
+    0 4px 12px #62451d30;
+}

@@ -24,3 +24,8 @@ Original game illustration for The Inner Circle, unified realistic historical pa
 - portrait-2.png: Single head-and-shoulders portrait of an older male guild master with grey beard, navy wool hood and fur collar, wise face, blurred guildhall. Square.
 - portrait-3.png: Single head-and-shoulders portrait of a confident female medieval textile merchant, dark green wool dress, linen head covering, warm face, blurred cloth market. Square.
 - portrait-4.png: Single head-and-shoulders portrait of a young male medieval craft master, brown leather apron over ochre linen tunic, curly hair, blurred forge. Square.
+
+
+## Wood background
+
+wood-background.png — Built-in image_gen. Prompt: Seamless repeating light warm honey-tan old oak planks, orthographic top-down, subtle natural grain, worn patina, narrow horizontal seams, even diffuse light, low contrast for readable UI. No objects, perspective, text, nails or vignette. Square texture.
