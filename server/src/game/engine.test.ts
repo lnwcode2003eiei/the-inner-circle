@@ -182,3 +182,19 @@ test("card events name actor and actual counter target through resolution", () =
   assert.ok(r.log.at(-1)!.text.includes("ใส่ " + b.name));
   assert.ok(r.log.at(-1)!.text.includes("มีผลแล้ว"));
 });
+
+test("deal lasts 120 seconds while counter window remains five seconds", () => {
+  const r = fixture(),
+    started = r.turnStartedAt;
+  assert.equal(r.turnDuration, 120000);
+  tick(r, started + 90000);
+  assert.equal(r.round, 1);
+  tick(r, started + 119999);
+  assert.equal(r.round, 1);
+  tick(r, started + 120000);
+  assert.equal(r.round, 2);
+  const before = Date.now();
+  play(r, r.players[0].id, "TAKE CONTROL");
+  assert.ok(r.stackDeadline! >= before + 5000);
+  assert.ok(r.stackDeadline! <= Date.now() + 5000);
+});

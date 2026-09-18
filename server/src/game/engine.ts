@@ -60,7 +60,7 @@ export function newRoom(code: string, p: Player): GameRoom {
     currentPlayerIndex: 0,
     bossId: p.id,
     turnStartedAt: Date.now(),
-    turnDuration: 90000,
+    turnDuration: 120000,
     stack: [],
     blocked: [],
     assignments: {},

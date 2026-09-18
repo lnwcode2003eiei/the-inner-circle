@@ -1,18 +1,18 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@400;500;600;700&display=swap");
 
-/* White canvas, navy structure, red actions and gold details. */
+/* Medieval palette: parchment, dark oak, muted navy, wine and aged brass. */
 :root {
   font-family: "Noto Sans Thai", sans-serif;
-  color: #172c54;
-  background: #f6f7fb;
+  color: #392d24;
+  background: #f6efdf;
   --gold: #ab7d27;
-  --muted: #66738a;
-  --line: #172c5415;
-  --panel: #fff;
+  --muted: #74634f;
+  --line: #392d2415;
+  --panel: #f6efdf;
   color-scheme: light;
 }
 body {
-  background: #f6f7fb;
+  background: #f6efdf;
 }
 button,
 input,
@@ -20,12 +20,12 @@ select {
   font-family: inherit;
 }
 * {
-  scrollbar-color: #bdc6d6 #eef1f7;
+  scrollbar-color: #c7b797 #e9dfcb;
 }
 .sidebar {
-  background: #172c54;
-  border-right: 1px solid #172c54;
-  color: #fff;
+  background: #392d24;
+  border-right: 1px solid #392d24;
+  color: #f6efdf;
 }
 .brand {
   color: #f4e5c3;
@@ -40,43 +40,43 @@ select {
 .club-tag {
   font-size: 9px;
   letter-spacing: 0;
-  color: #b8c4dc;
+  color: #c7b797;
   line-height: 1.8;
 }
 .nav-label {
-  color: #abbad3;
+  color: #c7b797;
   font-size: 10px;
   letter-spacing: 0;
   margin-top: 42px;
 }
 nav button {
   font-size: 12px;
-  color: #cbd5e6;
+  color: #c7b797;
   gap: 9px;
 }
 nav svg {
-  color: #aebed9;
+  color: #c7b797;
 }
 nav button.active {
-  background: linear-gradient(90deg, #d52f4540, #d52f4510);
-  color: #fff;
-  box-shadow: inset 3px 0 #dc3d4e;
+  background: linear-gradient(90deg, #873c4340, #873c4310);
+  color: #f6efdf;
+  box-shadow: inset 3px 0 #873c43;
 }
 nav button.active svg {
   color: #f0d394;
 }
 nav button:hover {
-  color: #fff;
-  background: #ffffff0d;
+  color: #f6efdf;
+  background: #f6efdf0d;
 }
 .nav-divider {
-  background: #ffffff15;
+  background: #f6efdf15;
 }
 .nav-dot {
   background: #d9b76b;
 }
 .club-card {
-  background: linear-gradient(130deg, #233b64, #182b4e);
+  background: linear-gradient(130deg, #392d24, #392d24);
   border-color: #d4af3750;
 }
 .club-card span,
@@ -90,38 +90,38 @@ nav button:hover {
   color: #e1c382;
 }
 .help-link {
-  color: #ced7e8;
+  color: #c7b797;
   font-size: 10px;
 }
 .sidebar-foot {
-  border-color: #ffffff15;
-  color: #bcc8dc;
+  border-color: #f6efdf15;
+  color: #c7b797;
   font-size: 8px;
   letter-spacing: 0;
 }
 header {
-  background: #fff;
-  border-bottom: 1px solid #172c5410;
+  background: #f6efdf;
+  border-bottom: 1px solid #392d2410;
 }
 .breadcrumb {
   font-size: 11px;
-  color: #6d7890;
+  color: #74634f;
 }
 .breadcrumb strong {
-  color: #243b60;
+  color: #392d24;
 }
 .breadcrumb svg {
-  color: #8a96aa;
+  color: #74634f;
 }
 .live-status {
   color: #526b64;
   font-size: 10px;
 }
 .header-divider {
-  background: #172c5415;
+  background: #392d2415;
 }
 .icon-button {
-  color: #586b88;
+  color: #74634f;
 }
 .profile-avatar {
   background: #f9f2e1;
@@ -129,11 +129,11 @@ header {
   border-color: #dac490;
 }
 .profile-name {
-  color: #1d355d;
+  color: #392d24;
   font-size: 11px;
 }
 .profile-name span {
-  color: #727e92;
+  color: #74634f;
   font-size: 9px;
 }
 .page-heading h1 {
@@ -141,12 +141,12 @@ header {
     500 32px/1.55 "Noto Serif Thai",
     serif;
   letter-spacing: -0.5px;
-  color: #172c54;
+  color: #392d24;
   margin: 8px 0 5px;
 }
 .page-heading p {
   font-size: 12px;
-  color: #66738a;
+  color: #74634f;
 }
 .eyebrow {
   font-size: 10px;
@@ -168,16 +168,16 @@ header {
   min-height: 410px;
   border: 1px solid #bfa46d;
   border-radius: 9px;
-  background: #172c54;
-  box-shadow: 0 12px 35px #172c540e;
+  background: #392d24;
+  box-shadow: 0 12px 35px #392d240e;
 }
 .hero > img {
   filter: saturate(0.5) brightness(0.78);
 }
 .hero-shade {
   background:
-    linear-gradient(90deg, #13274efc, #172c54ec 32%, #172c5455 78%),
-    linear-gradient(0deg, #12244dd9, transparent 55%);
+    linear-gradient(90deg, #392d24fc, #392d24ec 32%, #392d2455 78%),
+    linear-gradient(0deg, #392d24d9, transparent 55%);
 }
 .hero-content {
   padding: 34px 38px 33px;
@@ -192,7 +192,7 @@ header {
     500 48px/1.4 "Noto Serif Thai",
     serif;
   letter-spacing: 0;
-  color: #fff;
+  color: #f6efdf;
   margin: 17px 0 11px;
 }
 .hero h2 em {
@@ -200,13 +200,13 @@ header {
   font-style: normal;
 }
 .hero-content > p {
-  color: #d2dbee;
+  color: #e9dfcb;
   font-size: 12px;
   line-height: 1.9;
   max-width: 480px;
 }
 .hero-meta {
-  color: #d3dced;
+  color: #e9dfcb;
   font-size: 10px;
   gap: 15px;
   margin-top: 21px;
@@ -216,7 +216,7 @@ header {
 }
 .hero-seal {
   border-color: #dfc68880;
-  background: #172c5433;
+  background: #392d2433;
   width: 83px;
   height: 93px;
 }
@@ -231,39 +231,39 @@ header {
   color: #ece2c9;
 }
 .hero-bottom-label span {
-  color: #d8e0ea;
+  color: #e9dfcb;
 }
 .gold-button {
-  background: linear-gradient(110deg, #cc293f, #b31e35);
-  color: #fff;
-  border: 1px solid #bf293e;
-  box-shadow: 0 4px 12px #be26311c;
+  background: linear-gradient(110deg, #873c43, #873c43);
+  color: #f6efdf;
+  border: 1px solid #873c43;
+  box-shadow: 0 4px 12px #873c431c;
   font-size: 12px;
   min-height: 44px;
   padding: 11px 18px;
 }
 .gold-button:hover {
-  background: linear-gradient(110deg, #b82237, #a21a30);
+  background: linear-gradient(110deg, #873c43, #873c43);
   filter: none;
-  box-shadow: 0 6px 18px #be263133;
+  box-shadow: 0 6px 18px #873c4333;
 }
 .glass-button {
-  background: #ffffff0a;
+  background: #f6efdf0a;
   border-color: #f2e6ce60;
-  color: #fff;
+  color: #f6efdf;
   font-size: 12px;
 }
 .outline-button {
-  background: #fff;
-  border-color: #b9c5d8;
-  color: #1c396a;
+  background: #f6efdf;
+  border-color: #c7b797;
+  color: #392d24;
   font-size: 12px;
 }
 .outline-button:hover {
-  background: #edf2fa;
+  background: #e9dfcb;
 }
 .text-button {
-  color: #a02338;
+  color: #873c43;
   font-size: 11px;
 }
 .hero-buttons {
@@ -273,12 +273,12 @@ header {
   opacity: 0.45;
 }
 .feature-strip {
-  border-bottom-color: #172c5415;
+  border-bottom-color: #392d2415;
   gap: 15px;
   padding: 26px 0;
 }
 .feature-icon {
-  background: #fff;
+  background: #f6efdf;
   border-color: #d6be8b;
   color: #a67c2b;
   flex-shrink: 0;
@@ -287,11 +287,11 @@ header {
 }
 .feature-strip strong {
   font-size: 11px;
-  color: #213b64;
+  color: #392d24;
 }
 .feature-strip small {
   font-size: 10px;
-  color: #67758b;
+  color: #74634f;
   line-height: 1.8;
   margin-top: 3px;
 }
@@ -304,27 +304,27 @@ header {
   font:
     500 23px/1.6 "Noto Serif Thai",
     serif;
-  color: #172c54;
+  color: #392d24;
 }
 .path-card {
-  background: linear-gradient(145deg, #fff, #fafbfe);
-  border-color: #dce2ec;
+  background: linear-gradient(145deg, #f6efdf, #f6efdf);
+  border-color: #e9dfcb;
   border-top: 3px solid #c5a35c;
-  box-shadow: 0 3px 12px #172c5403;
+  box-shadow: 0 3px 12px #392d2403;
   padding: 23px 21px 0;
 }
 .path-card:nth-child(2) {
-  border-top-color: #c62d43;
+  border-top-color: #873c43;
 }
 .path-card:nth-child(3) {
-  border-top-color: #223f73;
+  border-top-color: #392d24;
 }
 .path-card:hover {
   border-color: #c8af77;
-  box-shadow: 0 10px 25px #172c540b;
+  box-shadow: 0 10px 25px #392d240b;
 }
 .path-icon {
-  color: #26477d;
+  color: #392d24;
 }
 .small-tag {
   font-size: 8px;
@@ -337,40 +337,40 @@ header {
   font:
     500 22px/1.6 "Noto Serif Thai",
     serif;
-  color: #1b345e;
+  color: #392d24;
 }
 .path-card p {
   font-size: 11px;
   line-height: 1.9;
-  color: #69758b;
+  color: #74634f;
   margin: 9px 0 20px;
 }
 .path-link {
   font-size: 10px;
-  color: #b12a40;
-  border-top-color: #172c5410;
+  color: #873c43;
+  border-top-color: #392d2410;
 }
 .path-number {
-  color: #172c5405;
+  color: #392d2405;
 }
 .mini-cards span {
-  background: #fff;
+  background: #f6efdf;
   border-color: #d2b477;
-  color: #bd2b40;
+  color: #873c43;
 }
 .quote {
   font:
     400 14px/1.9 "Noto Serif Thai",
     serif;
-  color: #788198;
+  color: #74634f;
   margin: 26px 0;
 }
 .quote span {
   color: #b38c42;
 }
 footer {
-  border-color: #172c5412;
-  color: #78859b;
+  border-color: #392d2412;
+  color: #74634f;
   font-size: 9px;
 }
 footer > div,
@@ -379,33 +379,33 @@ footer > div span {
   letter-spacing: 0;
 }
 footer > div span {
-  border-color: #172c5420;
+  border-color: #392d2420;
 }
 .panel {
-  background: #fff;
-  border-color: #dce3ed;
-  box-shadow: 0 5px 18px #172c5404;
+  background: #f6efdf;
+  border-color: #e9dfcb;
+  box-shadow: 0 5px 18px #392d2404;
 }
 .panel-title h2 {
   font:
     500 24px/1.5 "Noto Serif Thai",
     serif;
-  color: #1b345e;
+  color: #392d24;
 }
 .panel-title > span {
-  color: #687990;
+  color: #74634f;
   font-size: 11px;
 }
 .lobby-player strong {
-  color: #233b63;
+  color: #392d24;
   font-size: 13px;
 }
 .lobby-player > div > span {
   font-size: 11px;
-  color: #6a7b91;
+  color: #74634f;
 }
 .lobby-player {
-  border-color: #e9edf3;
+  border-color: #e9dfcb;
 }
 .ready-pill {
   color: #296347;
@@ -420,9 +420,9 @@ footer > div span {
   font-size: 10px;
 }
 .empty-seat {
-  color: #6c7c95;
-  border-color: #c9d3e2;
-  background: #f8faff;
+  color: #74634f;
+  border-color: #c7b797;
+  background: #f6efdf;
   font-size: 12px;
 }
 .lobby-settings {
@@ -430,21 +430,21 @@ footer > div span {
 }
 .lobby-settings h2 {
   font: 500 26px/1.6 "Noto Serif Thai";
-  color: #19345e;
+  color: #392d24;
 }
 .lobby-settings p {
-  color: #6b7890;
+  color: #74634f;
   font-size: 12px;
 }
 .room-code {
-  color: #213f70;
+  color: #392d24;
 }
 .game-top {
-  background: #172c54;
-  border-color: #243d68;
+  background: #392d24;
+  border-color: #392d24;
 }
 .game-top > span {
-  color: #c5d0e3;
+  color: #c7b797;
   font-size: 10px;
   letter-spacing: 0;
 }
@@ -459,27 +459,27 @@ footer > div span {
   font-size: 10px;
 }
 .player-panel {
-  background: #fff;
-  border-color: #dce3ed;
+  background: #f6efdf;
+  border-color: #e9dfcb;
 }
 .player-panel.leader {
-  background: linear-gradient(120deg, #fffaee, #fff);
+  background: linear-gradient(120deg, #fffaee, #f6efdf);
   border-color: #c8a963;
 }
 .player-top strong {
-  color: #213b63;
+  color: #392d24;
   font-size: 11px;
 }
 .player-top small {
-  color: #6c7c94;
+  color: #74634f;
   font-size: 9px;
 }
 .player-money {
-  color: #203d6b;
+  color: #392d24;
   font-size: 23px;
 }
 .player-money > span {
-  color: #6c7c94;
+  color: #74634f;
 }
 .investor-chip {
   background: #f9f2e2;
@@ -491,15 +491,15 @@ footer > div span {
   color: #2e7753;
 }
 .deal-card {
-  background: #fff;
+  background: #f6efdf;
   border-color: #d7be89;
 }
 .deal-image:after {
-  background: linear-gradient(0deg, #fff, transparent 65%);
+  background: linear-gradient(0deg, #f6efdf, transparent 65%);
 }
 .deal-image .small-tag {
   color: #f6e7c5;
-  background: #172c54cf;
+  background: #392d24cf;
   border-color: #d7bb75;
 }
 .deal-index {
@@ -511,7 +511,7 @@ footer > div span {
 }
 .deal-body > h2 {
   font: 500 28px/1.6 "Noto Serif Thai";
-  color: #17325e;
+  color: #392d24;
   margin: 10px 0 14px;
 }
 .deal-value {
@@ -520,24 +520,24 @@ footer > div span {
 }
 .deal-value > span {
   font: 11px "Noto Sans Thai";
-  color: #748096;
+  color: #74634f;
   letter-spacing: 0;
   margin-top: 5px;
 }
 .deal-requirements {
-  border-color: #e4e9f0;
+  border-color: #e9dfcb;
 }
 .deal-requirements > span {
   font-size: 10px;
-  color: #6a7790;
+  color: #74634f;
   letter-spacing: 0;
 }
 .deal-requirements small {
   font-size: 10px;
-  color: #78869a;
+  color: #74634f;
 }
 .deal-cta > p {
-  color: #63738a;
+  color: #74634f;
   font-size: 12px;
 }
 .pass-button {
@@ -545,7 +545,7 @@ footer > div span {
 }
 .current-offer > div:not(.eyebrow):not(.offer-actions) {
   font-size: 11px;
-  color: #586c86;
+  color: #74634f;
 }
 .current-offer b {
   color: #a37625;
@@ -557,56 +557,56 @@ footer > div span {
   font-size: 11px;
 }
 .stack-banner {
-  color: #a2263d;
+  color: #873c43;
   background: #fff1f3;
   border-radius: 4px;
   font-size: 12px;
 }
 .chat-tabs {
-  border-color: #e3e9f1;
+  border-color: #e9dfcb;
 }
 .chat-tabs button {
-  color: #6a7c95;
+  color: #74634f;
   font-size: 11px;
 }
 .chat-tabs button.selected {
-  color: #b2263c;
-  border-bottom-color: #bf2941;
+  color: #873c43;
+  border-bottom-color: #873c43;
 }
 .chat-empty {
   color: #b49553;
 }
 .chat-empty h3 {
   font: 500 19px/1.7 "Noto Serif Thai";
-  color: #2a4269;
+  color: #392d24;
 }
 .chat-empty p {
   font-size: 11px;
-  color: #728098;
+  color: #74634f;
 }
 .quick-chat {
   flex-wrap: wrap;
 }
 .quick-chat button {
-  color: #274573;
-  background: #f0f4fb;
-  border-color: #d9e1ec;
+  color: #392d24;
+  background: #e9dfcb;
+  border-color: #e9dfcb;
   font-size: 10px;
 }
 .chat-input {
-  background: #f8faff;
-  border-color: #cfd9e6;
+  background: #f6efdf;
+  border-color: #c7b797;
 }
 .chat-input input {
-  color: #20385f;
+  color: #392d24;
   font-size: 12px;
 }
 .chat-input button {
-  color: #b82a41;
+  color: #873c43;
 }
 .chat-note {
   font-size: 9px;
-  color: #79869b;
+  color: #74634f;
 }
 .message > span {
   font-size: 11px;
@@ -614,29 +614,29 @@ footer > div span {
 }
 .message > span > small {
   font-size: 9px;
-  color: #8390a4;
+  color: #74634f;
 }
 .message > p {
-  background: #f0f4fb;
-  color: #334e76;
+  background: #e9dfcb;
+  color: #392d24;
   font-size: 12px;
 }
 .message.mine > p {
   background: #fff2ed;
 }
 .log-entry p {
-  color: #64758e;
+  color: #74634f;
   font-size: 11px;
 }
 .hand-count {
-  color: #6d7c93;
+  color: #74634f;
   font-size: 10px;
   letter-spacing: 0;
 }
 .action-card {
-  background: linear-gradient(145deg, #fff, #edf2fb);
-  color: #26477d;
-  border-color: #bac9e1;
+  background: linear-gradient(145deg, #f6efdf, #e9dfcb);
+  color: #392d24;
+  border-color: #c7b797;
   min-width: 172px;
 }
 .action-card > div > span {
@@ -650,46 +650,46 @@ footer > div span {
 }
 .action-card p {
   font-size: 11px;
-  color: #64748e;
+  color: #74634f;
   min-height: 43px;
 }
 .play-label {
-  color: #284879;
+  color: #392d24;
   font-size: 9px;
   letter-spacing: 0;
-  border-color: #172c5415;
+  border-color: #392d2415;
 }
 .card-block {
-  background: linear-gradient(145deg, #fff, #fcecef);
-  color: #ae263e;
+  background: linear-gradient(145deg, #f6efdf, #fcecef);
+  color: #873c43;
   border-color: #e9b9c1;
 }
 .card-counter {
-  background: linear-gradient(145deg, #fff, #e9f0fd);
-  color: #234b86;
-  border-color: #b9ccec;
+  background: linear-gradient(145deg, #f6efdf, #e9dfcb);
+  color: #392d24;
+  border-color: #c7b797;
 }
 .card-wild {
-  background: linear-gradient(145deg, #fff, #fff4dc);
+  background: linear-gradient(145deg, #f6efdf, #fff4dc);
   color: #a27825;
   border-color: #e0cb98;
 }
 .collection-grid .action-card small {
   font-size: 10px;
-  color: #68798e;
-  border-color: #172c5415;
+  color: #74634f;
+  border-color: #392d2415;
 }
 .modal-backdrop {
-  background: #0a1b3e9e;
+  background: #392d249e;
 }
 .modal {
-  background: linear-gradient(135deg, #fff, #f8faff);
+  background: linear-gradient(135deg, #f6efdf, #f6efdf);
   border: 1px solid #d4bd84;
-  box-shadow: 0 25px 90px #091b4a40;
+  box-shadow: 0 25px 90px #392d2440;
 }
 .modal h2 {
   font: 500 28px/1.6 "Noto Serif Thai";
-  color: #1b345e;
+  color: #392d24;
 }
 .modal .eyebrow {
   font-size: 9px;
@@ -697,18 +697,18 @@ footer > div span {
   color: #967032;
 }
 .modal > p {
-  color: #64738a;
+  color: #74634f;
   font-size: 13px;
 }
 .modal label {
   font-size: 12px;
-  color: #2d446c;
+  color: #392d24;
 }
 .modal input,
 .modal select {
-  background: #fff;
-  border-color: #cbd5e4;
-  color: #203960;
+  background: #f6efdf;
+  border-color: #c7b797;
+  color: #392d24;
   font-size: 13px;
 }
 .modal input:focus,
@@ -718,22 +718,22 @@ footer > div span {
 }
 .modal-foot {
   font-size: 10px;
-  color: #728198;
+  color: #74634f;
 }
 .allocation-total {
   font-size: 12px;
-  color: #6b7990;
+  color: #74634f;
 }
 .allocation-total strong {
   color: #9f7327;
 }
 .allocation > div > span {
   font-size: 10px;
-  color: #74839b;
+  color: #74634f;
 }
 .toast {
-  background: #172c54;
-  color: #fff;
+  background: #392d24;
+  color: #f6efdf;
   border-color: #c6a65f;
   font-size: 12px;
 }
@@ -745,30 +745,30 @@ footer > div span {
 }
 .rule h2 {
   font: 500 22px/1.6 "Noto Serif Thai";
-  color: #223d66;
+  color: #392d24;
 }
 .rule p {
   font-size: 12px;
-  color: #66768f;
+  color: #74634f;
 }
 .empty-records h2 {
   font: 500 28px/1.7 "Noto Serif Thai";
-  color: #1c385f;
+  color: #392d24;
 }
 .empty-records p {
   font-size: 12px;
-  color: #72829a;
+  color: #74634f;
 }
 .rank-row {
-  border-color: #e4eaf3;
-  color: #26416c;
+  border-color: #e9dfcb;
+  color: #392d24;
 }
 .rank-row > b {
   color: #a2782a;
 }
 .results > h2 {
   font: 500 28px/1.7 "Noto Serif Thai";
-  color: #203c67;
+  color: #392d24;
 }
 @media (min-width: 1500px) {
   .hero-content {
@@ -1013,11 +1013,11 @@ footer > div span {
     font-size: 11px;
   }
   .mobile-chat-toggle {
-    border-color: #b9253b;
+    border-color: #873c43;
   }
   .game-layout > .chat-panel.drawer-open {
-    background: #fff;
-    box-shadow: 0 0 0 100vmax #091b3da0;
+    background: #f6efdf;
+    box-shadow: 0 0 0 100vmax #392d24a0;
   }
   .rank-row {
     font-size: 11px;
@@ -1029,13 +1029,13 @@ footer > div span {
 /* Investor ownership and deal selection */
 .investor-chip.investor-A {
   background: #ffe7ec;
-  border-color: #d6455a;
-  color: #9c1730;
+  border-color: #873c43;
+  color: #873c43;
 }
 .investor-chip.investor-B {
-  background: #e5efff;
-  border-color: #3b72c2;
-  color: #174481;
+  background: #e9dfcb;
+  border-color: #74634f;
+  color: #392d24;
 }
 .investor-chip.investor-C {
   background: #e3f5e9;
@@ -1043,9 +1043,9 @@ footer > div span {
   color: #205c39;
 }
 .investor-chip.investor-D {
-  background: #f0e6fb;
-  border-color: #9862bc;
-  color: #64348a;
+  background: #e9dfcb;
+  border-color: #74634f;
+  color: #74634f;
 }
 .investor-chip.investor-E {
   background: #fff0df;
@@ -1080,13 +1080,13 @@ footer > div span {
   border-radius: 50%;
   width: 17px;
   height: 17px;
-  background: #e9eef8;
-  color: #365686;
+  background: #e9dfcb;
+  color: #74634f;
   font: 10px "Noto Sans Thai";
 }
 .investor-selection {
-  background: #f6f8fd;
-  border: 1px solid #dbe3ef;
+  background: #f6efdf;
+  border: 1px solid #e9dfcb;
   border-radius: 7px;
   padding: 15px;
   margin: 15px 0;
@@ -1094,13 +1094,13 @@ footer > div span {
 }
 .investor-selection h3 {
   font-size: 13px;
-  color: #1e3966;
+  color: #392d24;
 }
 .investor-selection p,
 .investor-selection small {
   font-size: 10px;
   line-height: 1.8;
-  color: #657791;
+  color: #74634f;
 }
 .investor-selection label {
   display: flex;
@@ -1111,10 +1111,10 @@ footer > div span {
 .investor-selection select {
   width: 100%;
   min-width: 0;
-  border: 1px solid #c7d3e5;
+  border: 1px solid #c7b797;
   border-radius: 4px;
-  background: #fff;
-  color: #213d69;
+  background: #f6efdf;
+  color: #392d24;
   padding: 8px;
   font-size: 12px;
 }
@@ -1135,11 +1135,11 @@ footer > div span {
   object-position: center;
 }
 .deal-image:after {
-  background: linear-gradient(0deg, #fff, transparent 25%);
+  background: linear-gradient(0deg, #f6efdf, transparent 25%);
 }
 .deal-index {
-  color: #213d69;
-  background: #ffffffc9;
+  color: #392d24;
+  background: #f6efdfc9;
   padding: 4px;
   border-radius: 3px;
 }
@@ -1149,7 +1149,7 @@ footer > div span {
   object-fit: cover;
   border-radius: 4px;
   margin-top: 12px;
-  background: #fff;
+  background: #f6efdf;
 }
 .action-card h3 {
   margin: 12px 0 8px;
@@ -1167,7 +1167,7 @@ footer > div span {
   gap: 8px;
   margin: 15px 0;
   padding-top: 15px;
-  border-top: 1px solid #e1e7f0;
+  border-top: 1px solid #e9dfcb;
   font-size: 12px;
 }
 .allocation-buttons > .money-controls {
@@ -1179,17 +1179,17 @@ footer > div span {
 .money-controls button {
   width: 34px;
   height: 36px;
-  border: 1px solid #bfcce1;
+  border: 1px solid #c7b797;
   border-radius: 5px;
-  background: #edf2fb;
-  color: #203c69;
+  background: #e9dfcb;
+  color: #392d24;
   font-size: 20px;
 }
 .money-controls output {
   min-width: 85px;
   text-align: center;
   font-size: 13px;
-  color: #173360;
+  color: #392d24;
 }
 .allocation-buttons > .remainder-button {
   grid-column: 2;
@@ -1268,7 +1268,7 @@ footer > div span {
 
 /* Direct amount selection, with a visible selection and bounded scroll area. */
 .allocation-buttons > .selected-money {
-  color: #173360;
+  color: #392d24;
   font-weight: 700;
   text-align: right;
 }
@@ -1284,16 +1284,16 @@ footer > div span {
 }
 .money-options button {
   min-height: 40px;
-  border: 1px solid #c3cfe1;
+  border: 1px solid #c7b797;
   border-radius: 6px;
-  background: #fff;
-  color: #203c69;
+  background: #f6efdf;
+  color: #392d24;
   font-size: 13px;
   font-weight: 600;
 }
 .money-options button[aria-pressed="true"] {
-  background: #193b6b;
-  color: #fff;
+  background: #392d24;
+  color: #f6efdf;
   border: 2px solid #c49843;
   box-shadow: 0 0 0 1px #c49843;
 }
@@ -1328,6 +1328,175 @@ footer > div span {
 }
 .hero-shade {
   background:
-    linear-gradient(90deg, #1d242af5, #202b36db 32%, #252b351a 80%),
-    linear-gradient(0deg, #1b222ac9, transparent 55%);
+    linear-gradient(90deg, #392d24f5, #392d24db 32%, #392d241a 80%),
+    linear-gradient(0deg, #392d24c9, transparent 55%);
+}
+
+/* Structural surfaces and controls retain clear contrast over the warm canvas. */
+:root {
+  color: #35291f;
+  background: #e9dfca;
+  --gold: #99743b;
+  --muted: #74634f;
+  --line: #806b4933;
+  --panel: #f6efdf;
+}
+body {
+  background: radial-gradient(ellipse at top, #f5eddb, #e9dfca 75%);
+  color: #35291f;
+}
+.sidebar {
+  background: linear-gradient(165deg, #35291f, #241e1a);
+  border-right-color: #8d7144;
+  color: #f3e7cb;
+}
+.club-card {
+  background: linear-gradient(135deg, #3c4850, #28333a);
+  border-color: #9c804c;
+}
+.club-tag,
+.nav-label,
+.sidebar-foot,
+.help-link,
+nav button,
+nav svg {
+  color: #d4c5a5;
+}
+nav button.active {
+  background: linear-gradient(90deg, #763b3ee0, #763b3e35);
+  box-shadow: inset 3px 0 #c5a366;
+  color: #fff3d6;
+}
+header {
+  background: #f6efdf;
+  border-bottom-color: #bcaa873d;
+}
+.game-top {
+  background: #303d45;
+  border-color: #9b8053;
+}
+.game-top > span {
+  color: #e0d4b9;
+}
+.gold-button {
+  background: linear-gradient(110deg, #853c43, #6e2e36);
+  border-color: #aa864b;
+  color: #fff3db;
+  box-shadow: 0 4px 12px #45272025;
+}
+.gold-button:hover {
+  background: linear-gradient(110deg, #713139, #58232c);
+}
+.outline-button {
+  background: #f6efdf;
+  border-color: #b6a17a;
+  color: #423225;
+}
+.outline-button:hover {
+  background: #e9ddc4;
+}
+.panel,
+.player-panel,
+.deal-card {
+  background: #f6efdf;
+  border-color: #c5b18a;
+}
+.player-panel.leader {
+  background: linear-gradient(120deg, #f2e3bd, #f6efdf);
+  border-color: #a7803d;
+}
+.investor-selection,
+.current-offer,
+.empty-seat,
+.quick-chat button,
+.message > p,
+.chat-input {
+  background: #ede3d0;
+  border-color: #c7b592;
+  color: #433729;
+}
+.message.mine > p {
+  background: #edddd2;
+}
+.modal {
+  background: linear-gradient(135deg, #faf2df, #eee2ca);
+  border-color: #a98a53;
+}
+.modal input,
+.modal select,
+.investor-selection select {
+  background: #fff7e7;
+  color: #3b3024;
+  border-color: #bdaa82;
+}
+.modal-backdrop {
+  background: #211a15b8;
+}
+.stack-banner {
+  background: #efddd4;
+  color: #723039;
+  border: 1px solid #c49b86;
+}
+.money-options button {
+  background: #fbf3e2;
+  border-color: #b7a17c;
+  color: #493723;
+}
+.money-options button[aria-pressed="true"] {
+  background: #71343c;
+  color: #fff2d6;
+  border-color: #bd995b;
+}
+.allocation-buttons > .selected-money {
+  color: #5b4227;
+}
+.remaining-money {
+  background: #f0e0b9;
+  border-color: #b89b61;
+  color: #64491f;
+}
+.toast {
+  background: #352b24;
+  border-color: #b39358;
+  color: #f9edcf;
+}
+.investor-chip.investor-A {
+  background: #ecd8d2;
+  border-color: #a66763;
+  color: #743538;
+}
+.investor-chip.investor-B {
+  background: #dce2e1;
+  border-color: #738794;
+  color: #354e60;
+}
+.investor-chip.investor-C {
+  background: #e0e4d3;
+  border-color: #7b8b65;
+  color: #475b36;
+}
+.investor-chip.investor-D {
+  background: #e5dce2;
+  border-color: #958097;
+  color: #674c6a;
+}
+.investor-chip.investor-E {
+  background: #eee0c9;
+  border-color: #b08b59;
+  color: #855728;
+}
+.investor-chip.investor-F {
+  background: #f0e5bd;
+  border-color: #ab9451;
+  color: #756021;
+}
+button:focus-visible,
+a:focus-visible {
+  outline: 3px solid #946e31;
+  outline-offset: 3px;
+}
+@media (max-width: 600px) {
+  .game-layout > .chat-panel.drawer-open {
+    background: #f6efdf;
+  }
 }
