@@ -1265,3 +1265,59 @@ footer > div span {
     height: 110px;
   }
 }
+
+/* Direct amount selection, with a visible selection and bounded scroll area. */
+.allocation-buttons > .selected-money {
+  color: #173360;
+  font-weight: 700;
+  text-align: right;
+}
+.allocation-buttons > .money-options {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+  gap: 7px;
+  max-height: 196px;
+  overflow-y: auto;
+  padding: 4px;
+  max-width: none;
+}
+.money-options button {
+  min-height: 40px;
+  border: 1px solid #c3cfe1;
+  border-radius: 6px;
+  background: #fff;
+  color: #203c69;
+  font-size: 13px;
+  font-weight: 600;
+}
+.money-options button[aria-pressed="true"] {
+  background: #193b6b;
+  color: #fff;
+  border: 2px solid #c49843;
+  box-shadow: 0 0 0 1px #c49843;
+}
+.money-options button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.money-options button:focus-visible {
+  outline: 3px solid #b3802b;
+  outline-offset: 2px;
+}
+.stack-banner {
+  align-items: flex-start;
+  line-height: 1.8;
+}
+.stack-banner > svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+@media (max-width: 600px) {
+  .allocation-buttons > .selected-money {
+    text-align: left;
+  }
+  .money-options button {
+    min-height: 44px;
+  }
+}

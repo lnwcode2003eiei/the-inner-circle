@@ -161,3 +161,24 @@ test("full games pay exactly once with conserved money", () => {
     assert.equal(r.round, r.totalDeals + 1);
   }
 });
+
+test("card events name actor and actual counter target through resolution", () => {
+  const r = fixture(),
+    a = r.players[0],
+    b = r.players[1],
+    c = r.players[2];
+  play(r, a.id, "BLOCK", b.id);
+  assert.ok(r.log.at(-1)!.text.includes(a.name + " ใช้"));
+  assert.ok(r.log.at(-1)!.text.includes("ใส่ " + b.name));
+  // A client-supplied counter target must never override the previous card owner.
+  play(r, b.id, "COUNTER", c.id);
+  assert.equal(r.stack.at(-1)!.target, a.id);
+  assert.ok(r.log.at(-1)!.text.includes("ของ " + a.name));
+  play(r, c.id, "COUNTER", a.id);
+  assert.equal(r.stack.at(-1)!.target, b.id);
+  assert.ok(r.log.at(-1)!.text.includes("ของ " + b.name));
+  tick(r, r.stackDeadline! + 1);
+  assert.ok(r.log.at(-1)!.text.includes(a.name + " ใช้"));
+  assert.ok(r.log.at(-1)!.text.includes("ใส่ " + b.name));
+  assert.ok(r.log.at(-1)!.text.includes("มีผลแล้ว"));
+});

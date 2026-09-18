@@ -1,3 +1,4 @@
+import { describeCard } from "../shared/card-events";
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -319,22 +320,22 @@ function App() {
     setAmounts(Object.fromEntries(participants.map((id) => [id, 0])));
     setModal("offer");
   };
-  const adjustMoney = (id: string, direction: number) =>
+  const moneyOptions = [
+    0,
+    ...Array.from(
+      {
+        length: Math.max(0, Math.floor((room?.deal?.value ?? 0) / 500000) - 1),
+      },
+      (_, i) => 1000000 + i * 500000,
+    ),
+  ];
+  const selectMoney = (id: string, value: number) =>
     setAmounts((previous) => {
-      const current = previous[id] ?? 0;
-      const next =
-        direction > 0
-          ? current === 0
-            ? 1000000
-            : current + 500000
-          : current <= 1000000
-            ? 0
-            : current - 500000;
       const others = participants
-        .filter((p) => p !== id)
-        .reduce((sum, p) => sum + (previous[p] ?? 0), 0);
-      return next >= 0 && others + next <= (room?.deal?.value ?? 0)
-        ? { ...previous, [id]: next }
+        .filter((pid) => pid !== id)
+        .reduce((sum, pid) => sum + (previous[pid] ?? 0), 0);
+      return others + value <= (room?.deal?.value ?? 0)
+        ? { ...previous, [id]: value }
         : previous;
     });
   const copy = () =>
@@ -1008,14 +1009,18 @@ function App() {
                           {room.stack.length > 0 ? (
                             <div className="stack-banner">
                               <Swords size={18} />
-                              {CARD_NAMES[room.stack.at(-1)!.card.type]} ·{" "}
-                              {Math.max(
-                                0,
-                                Math.ceil(
-                                  ((room.stackDeadline ?? 0) - now) / 1000,
-                                ),
-                              )}
-                              วินาทีสำหรับโต้กลับ
+                              <span>
+                                {describeCard(room, room.stack.at(-1)!)}
+                                <br />
+                                รอผล · โต้กลับได้{" "}
+                                {Math.max(
+                                  0,
+                                  Math.ceil(
+                                    ((room.stackDeadline ?? 0) - now) / 1000,
+                                  ),
+                                )}
+                                วินาที
+                              </span>
                             </div>
                           ) : room.offer ? (
                             <div className="current-offer">
@@ -1479,33 +1484,31 @@ function App() {
                       <span>
                         {room?.players.find((p) => p.id === id)?.name}
                       </span>
-                      <div className="money-controls">
-                        <button
-                          aria-label={
-                            "ลดส่วนแบ่ง " +
-                            room?.players.find((p) => p.id === id)?.name
-                          }
-                          disabled={!(amounts[id] > 0)}
-                          onClick={() => adjustMoney(id, -1)}
-                        >
-                          −
-                        </button>
-                        <output aria-live="polite">
-                          {money(amounts[id] ?? 0)}
-                        </output>
-                        <button
-                          aria-label={
-                            "เพิ่มส่วนแบ่ง " +
-                            room?.players.find((p) => p.id === id)?.name
-                          }
-                          disabled={
-                            remaining <
-                            ((amounts[id] ?? 0) === 0 ? 1000000 : 500000)
-                          }
-                          onClick={() => adjustMoney(id, 1)}
-                        >
-                          +
-                        </button>
+                      <output className="selected-money" aria-live="polite">
+                        {money(amounts[id] ?? 0)}
+                      </output>
+                      <div
+                        className="money-options"
+                        role="group"
+                        aria-label={
+                          "เลือกส่วนแบ่งของ " +
+                          room?.players.find((p) => p.id === id)?.name
+                        }
+                      >
+                        {moneyOptions.map((value) => (
+                          <button
+                            key={value}
+                            type="button"
+                            aria-pressed={(amounts[id] ?? 0) === value}
+                            disabled={
+                              allocated - (amounts[id] ?? 0) + value >
+                              room!.deal!.value
+                            }
+                            onClick={() => selectMoney(id, value)}
+                          >
+                            {value === 0 ? "0" : value / 1000000 + "M"}
+                          </button>
+                        ))}
                       </div>
                       <button
                         className="text-button remainder-button"

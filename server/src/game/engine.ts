@@ -1,3 +1,4 @@
+import { describeCard } from "../../../shared/card-events";
 import { randomUUID, randomInt } from "node:crypto";
 import type {
   Action,
@@ -8,7 +9,6 @@ import type {
 } from "../../../shared/types";
 import {
   CARD_INFO,
-  CARD_NAMES,
   DEALS,
   INVESTORS,
   MAX_PLAYERS,
@@ -258,12 +258,17 @@ export function act(r: GameRoom, id: string, a: Action) {
       id: randomUUID(),
       playerId: id,
       card: c,
-      target: a.target,
+      target:
+        c.type === "COUNTER"
+          ? r.stack.at(-1)!.playerId
+          : c.type === "TAKE CONTROL"
+            ? r.bossId
+            : a.target,
       investor: a.investor,
     });
     r.stackDeadline = Date.now() + 5000;
     invalidate(r);
-    log(r, `${p.name} ใช้การ์ด ${CARD_NAMES[c.type]}`);
+    log(r, describeCard(r, r.stack.at(-1)!) + " · รอผล โต้กลับได้ 5 วินาที");
     return;
   }
   if (r.stack.length) throw Error("กำลังประมวลผลการ์ด");
@@ -372,8 +377,14 @@ export function tick(r: GameRoom, now = Date.now()) {
           invalidate(r);
           break;
       }
-      log(r, `${CARD_NAMES[base.card.type]} มีผลแล้ว`);
-    } else log(r, `${CARD_NAMES[base.card.type]} ถูกโต้กลับ`);
+      log(r, describeCard(r, base) + " · มีผลแล้ว");
+    } else
+      log(
+        r,
+        describeCard(r, base) +
+          " · ถูกโต้กลับโดย " +
+          r.players.find((p) => p.id === r.stack.at(-1)!.playerId)?.name,
+      );
     r.stack = [];
     r.stackDeadline = undefined;
     changed = true;
