@@ -43,19 +43,14 @@ import { TradingCard } from "./components/TradingCard";
 import "./index.css";
 import "./thai-theme.css";
 const money = (n: number) =>
-  `฿${(n / 1000000).toLocaleString("th-TH", { maximumFractionDigits: 2 })} ล้าน`;
-const portraits = [
-  "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=100&h=100&fit=crop&crop=faces",
-  "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&h=100&fit=crop&crop=faces",
-  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=100&h=100&fit=crop&crop=faces",
-  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&h=100&fit=crop&crop=faces",
-];
+  `${(n / 1000000).toLocaleString("en-US", { maximumFractionDigits: 2 })}$`;
+const portraits = [1, 2, 3, 4].map((i) => `/art/medieval/portrait-${i}.png`);
 const investorNames = [
   "อเล็กซานดรา • เงินทุน",
-  "เบนเน็ตต์ • เทคโนโลยี",
-  "เซลีน • อสังหาริมทรัพย์",
-  "โดมินิก • อุตสาหกรรม",
-  "เอเลนา • ธุรกิจร่วมทุน",
+  "เบนเน็ตต์ • งานช่าง",
+  "เซลีน • โรงเตี๊ยม",
+  "โดมินิก • โรงตีเหล็ก",
+  "เอเลนา • การค้าทางเรือ",
   "เฟลิกซ์ • การเงิน",
 ];
 function App() {
@@ -469,8 +464,8 @@ function App() {
               </div>
               <section className="hero">
                 <img
-                  src="https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=1800&q=85"
-                  alt="ตึกระฟ้าสมัยใหม่ใจกลางย่านธุรกิจ"
+                  src="/art/medieval/hero.png"
+                  alt="เมืองการค้ายุคกลางริมแม่น้ำ มีตลาด รถม้า และสะพานหิน"
                 />
                 <div className="hero-shade" />
                 <div className="hero-grid" />
@@ -484,7 +479,7 @@ function App() {
                     <em>นักเจรจา</em>
                   </h2>
                   <p>
-                    สิบสองที่นั่ง โอกาสไม่รู้จบ เกมแห่งธุรกิจ
+                    สิบสองที่นั่ง ณ สมาคมพ่อค้าแห่งเมืองเก่า
                     <br className="desktop-break" /> พันธมิตร
                     และคำสัญญาที่อาจเปลี่ยนไป
                   </p>
@@ -930,8 +925,8 @@ function App() {
                       >
                         <div className="deal-image">
                           <img
-                            src={`/art/${room.deal?.artwork}.png`}
-                            alt="สถาปัตยกรรมร่วมสมัยของโครงการ"
+                            src={`/art/medieval/${room.deal?.artwork}.png`}
+                            alt="กิจการค้าขายในเมืองยุคกลาง"
                           />
                           <span className="small-tag">{room.deal?.sector}</span>
                           <span className="deal-index">
@@ -1506,7 +1501,7 @@ function App() {
                             }
                             onClick={() => selectMoney(id, value)}
                           >
-                            {value === 0 ? "0" : value / 1000000 + "M"}
+                            {money(value)}
                           </button>
                         ))}
                       </div>

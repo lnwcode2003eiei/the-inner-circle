@@ -176,7 +176,7 @@ export function TradingCard({ type }: { type: CardType }) {
         strokeWidth="3"
       />
       <image
-        href={"/art/" + CARD_ART[type] + ".png"}
+        href={"/art/medieval/" + CARD_ART[type] + ".png"}
         x="21"
         y="78"
         width="258"

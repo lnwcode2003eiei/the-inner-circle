@@ -1321,3 +1321,13 @@ footer > div span {
     min-height: 44px;
   }
 }
+
+/* Keep the medieval painting visible beneath the readable hero text. */
+.hero > img {
+  filter: saturate(0.85) brightness(0.9);
+}
+.hero-shade {
+  background:
+    linear-gradient(90deg, #1d242af5, #202b36db 32%, #252b351a 80%),
+    linear-gradient(0deg, #1b222ac9, transparent 55%);
+}
